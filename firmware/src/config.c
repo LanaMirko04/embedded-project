@@ -1,14 +1,13 @@
 /*!
- * \file            main.h
+ * \file            config.h
  * \date            2025-10-16
  * \author          Giulia Cristofolini [giulia.cristofolini@studenti.unitn.it]
  *                  Mirko Lana [lana.mirko@icloud.com]
  *                  Mattia Zagatti [mattia.zagatti@studenti.unitn.it]
  *
- * \brief           CYD main program.
+ * \brief           TBD
  */
 
-#include <stdio.h>
+#include "config.h"
 
-void app_main(void) {
-}
+#include <stdlib.h>
