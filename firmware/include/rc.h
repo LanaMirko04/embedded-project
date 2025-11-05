@@ -36,6 +36,6 @@ int rc_set_err_msg(const char *fmt, ...);
  *
  * \return          The pointer to the error message.
  */
-inline const char *rc_get_err_msg(void);
+const char *rc_get_err_msg(void);
 
 #endif /*! ERR_H */

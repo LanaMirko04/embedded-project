@@ -28,6 +28,8 @@ static fsm_trans_fun fsm_trans_array[FSM_STATE_LEN]; /*!< Array of transition fu
  */
 static int prv_fsm_init_trans_fun(enum FsmState next_state) {
     switch (next_state) {
+        case FSM_STATE_INIT:
+        case FSM_STATE_ERROR:
         case FSM_STATE_WIFI_CONNECTION:
         case FSM_STATE_CHECK_CONFIG:
             fsm_current_state = next_state;
@@ -150,11 +152,11 @@ void fsm_init(void) {
     fsm_trans_array[FSM_STATE_ERROR] = prv_fsm_error_trans_fun;
 }
 
-inline enum FsmState fsm_get_state(void) {
+enum FsmState fsm_get_state(void) {
     return fsm_current_state;
 }
 
-inline const char *fsm_get_state_name(enum FsmState state) {
+const char *fsm_get_state_name(enum FsmState state) {
     return FSM_STATE_NAMES[state];
 }
 

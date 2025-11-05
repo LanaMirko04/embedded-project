@@ -34,7 +34,7 @@ void fsm_init(void);
  *
  * \return          The state of the FSM.
  */
-inline enum FsmState fsm_get_state(void);
+enum FsmState fsm_get_state(void);
 
 /*!
  * \brief           Get the given state name.
@@ -42,7 +42,7 @@ inline enum FsmState fsm_get_state(void);
  * \param[in]       state: The state to get the name for.
  * \return          The name of the given state.
  */
-inline const char *fsm_get_state_name(enum FsmState state);
+const char *fsm_get_state_name(enum FsmState state);
 
 /*!
  * \brief           Update the current state of the FSM.
