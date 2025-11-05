@@ -31,6 +31,6 @@ int rc_set_err_msg(const char *fmt, ...) {
     return len < 0 ? RC_FAIL : len;
 }
 
-const char *rc_get_err_msg(void) {
+inline const char *rc_get_err_msg(void) {
     return &rc_err_msg;
 }

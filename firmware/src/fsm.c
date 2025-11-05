@@ -33,7 +33,10 @@ static int prv_fsm_init_trans_fun(enum FsmState next_state) {
             fsm_current_state = next_state;
             break;
         default:
-            //printf("CAcati addosso, log");
+
+            rc_set_err_msg("The state %s is not reachable from %s state.",
+                           fsm_get_state_name(next_state),
+                           fsm_get_state_name(fsm_current_state));
             return RC_FSM_ERR_INVALID_NEXT_STATE;
     }
     return RC_OK;
@@ -50,7 +53,10 @@ static int prv_fsm_wifi_connection_trans_fun(enum FsmState next_state) {
             fsm_current_state = next_state;
             break;
         default:
-            //printf("CAcati addosso, log");
+
+            rc_set_err_msg("The state %s is not reachable from %s state.",
+                           fsm_get_state_name(next_state),
+                           fsm_get_state_name(fsm_current_state));
             return RC_FSM_ERR_INVALID_NEXT_STATE;
     }
     return RC_OK;
@@ -66,7 +72,10 @@ static int prv_fsm_check_config_trans_fun(enum FsmState next_state) {
             fsm_current_state = next_state;
             break;
         default:
-            //printf("CAcati addosso, log");
+
+            rc_set_err_msg("The state %s is not reachable from %s state.",
+                           fsm_get_state_name(next_state),
+                           fsm_get_state_name(fsm_current_state));
             return RC_FSM_ERR_INVALID_NEXT_STATE;
     }
     return RC_OK;
@@ -81,8 +90,11 @@ static int prv_fsm_load_config_trans_fun(enum FsmState next_state) {
         case FSM_STATE_DISPLAY_UPDATE:
             fsm_current_state = next_state;
             break;
+
         default:
-            //printf("CAcati addosso, log");
+            rc_set_err_msg("The state %s is not reachable from %s state.",
+                           fsm_get_state_name(next_state),
+                           fsm_get_state_name(fsm_current_state));
             return RC_FSM_ERR_INVALID_NEXT_STATE;
     }
     return RC_OK;
@@ -98,8 +110,11 @@ static int prv_fsm_display_update_trans_fun(enum FsmState next_state) {
         case FSM_STATE_INIT:
             fsm_current_state = next_state;
             break;
+
         default:
-            //printf("CAcati addosso, log");
+            rc_set_err_msg("The state %s is not reachable from %s state.",
+                           fsm_get_state_name(next_state),
+                           fsm_get_state_name(fsm_current_state));
             return RC_FSM_ERR_INVALID_NEXT_STATE;
     }
     return RC_OK;
@@ -114,8 +129,11 @@ static int prv_fsm_error_trans_fun(enum FsmState next_state) {
         case FSM_STATE_INIT:
             fsm_current_state = next_state;
             break;
+
         default:
-            //printf("CAcati addosso, log");
+            rc_set_err_msg("The state %s is not reachable from %s state.",
+                           fsm_get_state_name(next_state),
+                           fsm_get_state_name(fsm_current_state));
             return RC_FSM_ERR_INVALID_NEXT_STATE;
     }
     return RC_OK;
@@ -132,11 +150,11 @@ void fsm_init(void) {
     fsm_trans_array[FSM_STATE_ERROR] = prv_fsm_error_trans_fun;
 }
 
-enum FsmState fsm_get_state(void) {
+inline enum FsmState fsm_get_state(void) {
     return fsm_current_state;
 }
 
-const char *fsm_get_state_name(enum FsmState state) {
+inline const char *fsm_get_state_name(enum FsmState state) {
     return FSM_STATE_NAMES[state];
 }
 
