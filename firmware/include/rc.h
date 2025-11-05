@@ -11,25 +11,27 @@
 #ifndef RC_H
 #define RC_H
 
-#define RC_ERR_MSG_LEN 0x31 /*!< Error message buffer length */
+#define RC_ERR_MSG_LEN 128U /*!< Error message buffer length */
 
-#define RC_FAIL (-1) /*!< Undefined error */
-#define RC_OK (0)    /*!< Everything's OK */
+#define RC_FAIL -1 /*!< Undefined error */
+#define RC_OK 0    /*!< Everything's OK */
 
-#define RC_ERR_INVALID_ARG (0x101)  /*!< Invalid argument */
-#define RC_ERR_INVALID_SIZE (0x102) /*!< Invalid argument */
-#define RC_ERR_NULL_PTR (0x103)     /*!< Unexpected NULL pointer */
+#define RC_ERR_INVALID_ARG 0x101  /*!< Invalid argument */
+#define RC_ERR_INVALID_SIZE 0x102 /*!< Invalid argument */
+#define RC_ERR_NULL_PTR 0x103     /*!< Unexpected NULL pointer */
 
 /*!
  * \brief           Set the error message.
  *
- * \param[in]       msg: The message (48 chars MAX).
- * \return          TBD.
+ * \param[in]       fmt: Format string.
+ * \param[in]       ...: variable arguments.
+ * \return          The length of the error message on success, RC_FAIL otherwise.
  */
-int rc_set_err_msg(const char msg[RC_ERR_MSG_LEN]);
+int rc_set_err_msg(const char *fmt, ...);
 
 /*!
  * \brief           Get the error message.
+ *
  * \return          The pointer to the error message.
  */
 const char *rc_get_err_msg(void);
