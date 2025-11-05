@@ -20,6 +20,8 @@
 #define RC_ERR_INVALID_SIZE (0x102) /*!< Invalid argument */
 #define RC_ERR_NULL_PTR (0x103)     /*!< Unexpected NULL pointer */
 
+#define RC_FSM_ERR_INVALID_NEXT_STATE (0x201) /*!< Invalid FSM next state */
+
 /*!
  * \brief           Set the error message.
  *
