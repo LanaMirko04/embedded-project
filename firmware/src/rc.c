@@ -32,5 +32,5 @@ int rc_set_err_msg(const char *fmt, ...) {
 }
 
 const char *rc_get_err_msg(void) {
-    return &rc_err_msg;
+    return rc_err_msg;
 }
