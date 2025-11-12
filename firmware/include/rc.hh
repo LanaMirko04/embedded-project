@@ -22,6 +22,10 @@
 
 #define RC_FSM_ERR_INVALID_NEXT_STATE 0x201 /*!< Invalid FSM next state */
 
+#ifdef __cplusplus
+extern "C" {
+#endif /*! __cplusplus */
+
 /*!
  * \brief           Set the error message.
  *
@@ -37,5 +41,9 @@ int rc_set_err_msg(const char *fmt, ...);
  * \return          The pointer to the error message.
  */
 const char *rc_get_err_msg(void);
+
+#ifdef __cplusplus
+}
+#endif /*! __cplusplus */
 
 #endif /*! ERR_H */

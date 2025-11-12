@@ -24,6 +24,10 @@ enum FsmState {
     FSM_STATE_LEN              /*!< Length of the enum, not a real state */
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif /*! __cplusplus */
+
 /*!
  * \brief           Initialize the FSM.
  */
@@ -53,5 +57,9 @@ const char *fsm_get_state_name(enum FsmState state);
  *                     relat  to the current one.
  */
 int fsm_update(enum FsmState next_state);
+
+#ifdef __cplusplus
+}
+#endif /*! __cplusplus */
 
 #endif /*! FSM_H */
