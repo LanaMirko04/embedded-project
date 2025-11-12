@@ -8,7 +8,7 @@
  * \brief           Return codes and error handling.
  */
 
-#include "rc.h"
+#include "rc.hh"
 
 #include <stdio.h>
 #include <stdarg.h>
