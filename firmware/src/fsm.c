@@ -1,5 +1,5 @@
-#include "rc.hh"
-#include "fsm.hh"
+#include "rc.h"
+#include "fsm.h"
 
 /*!
  * \brief           Type definition for FSM transition functions.

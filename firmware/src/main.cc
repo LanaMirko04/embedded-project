@@ -8,7 +8,10 @@
  * \brief           CYD main program.
  */
 
-#include <stdio.h>
+#include "esp_log.h"
+
+#define TAG "main"
 
 extern "C" void app_main(void) {
+    ESP_LOGI(TAG, "Palle");
 }
