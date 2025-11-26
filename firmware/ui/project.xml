@@ -1,7 +1,11 @@
 <project name="ui">
-	<targets>
-		<target name="target1">
-			<display width="320" height="240" />
-		</target>
-	</targets>
+    <folders>
+        <folder path="ui" />
+    </folders>
+
+    <targets>
+        <target name="t1">
+            <display width="320" height="240" />
+        </target>
+    </targets>
 </project>
