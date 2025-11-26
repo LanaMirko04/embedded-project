@@ -1,20 +1,3 @@
-DROP TABLE IF EXISTS users;
-DROP TABLE IF EXISTS busses;
-
-CREATE TABLE users (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  username TEXT UNIQUE NOT NULL,
-  password TEXT NOT NULL
-);
-
-CREATE TABLE busses (
-  id INTEGER PRIMARY KEY,
-  bus_number TEXT NOT NULL,
-  bus_name TEXT NOT NULL,
-  color TEXT
-);
-  
-INSERT INTO busses (id, bus_number, bus_name, color) VALUES
 (580, '6', 'Costa Corso Rosmini S.Giorgio/Ospedale', 'None'),
 (69, 'B402', 'Trento - Nogarè - Baselga di Pinè -Montesover', 'None'),
 (84, 'B429', 'Centrale - Regnana', 'None'),
@@ -79,12 +62,12 @@ INSERT INTO busses (id, bus_number, bus_name, color) VALUES
 (417, 'B863', 'Linea 3 integrata:Nago-Torbole-Riva-Arco-Bolognano', 'None'),
 (420, 'B861', 'Linea 1: Riva -Varone -Arco -S.Giorgio-Brione-Riva', 'None'),
 (423, 'B862', 'Linea 2: Riva-Brione-S.Giorgio-Arco-Varone-Riva', 'None'),
-(672, 'B869', 'Riva del Garda-Deva-Pranzo-Campi', 'None'),
-(352, 'R35', 'FERROVIA TRENTO - MALÉ - MEZZANA', 'None'),
+(672, 'B869', ' Riva del Garda-Deva-Pranzo-Campi', 'None'),
+(352, 'R35', ' FERROVIA TRENTO - MALE' - MEZZANA', 'None'),
 (695, 'R25', 'Servizi Trenitalia - Andata Tn-Bassano', 'None'),
-(7, 'B114', 'Casatta di Valfloriana - Palù - Sicina', 'None'),
+(7, 'B114', 'Casatta di Valfloriana - Palu' - Sicina', 'None'),
 (55, 'B104', 'Trento-S.Michele a/A-Salorno-Egna-Ora-Cavalese', 'None'),
-(60, 'B105', 'Verla - Valternigo - Palù di Giovo', 'None'),
+(60, 'B105', 'Verla - Valternigo - Palu' di Giovo', 'None'),
 (63, 'B121', 'Montesover - Sover', 'None'),
 (65, 'B109', 'Cavalese - Masi di Cavalese', 'None'),
 (67, 'B111', 'Cavalese - Carano - Villaggio Veronza', 'None'),
@@ -105,7 +88,7 @@ INSERT INTO busses (id, bus_number, bus_name, color) VALUES
 (78, 'B203', 'Vezzano-Ciago-Ranzo-Margone', 'None'),
 (80, 'B206', 'Trento-Cadine-Sopramonte-Terlago-MTerlago', 'None'),
 (134, 'B205', 'Trento-Vezzano-Sarche-Dro-Arco-Riva', 'None'),
-(153, 'B211', 'Riva del Garda-Tenno-Fiavè - Ponte Arche', 'None'),
+(153, 'B211', 'Riva del Garda-Tenno-Fiave'-Ponte Arche', 'None'),
 (155, 'B210', 'Ponte Arche-S.Croce-Cavrasto-Bivedo', 'None'),
 (157, 'B215', 'Tione-Pieve di Bono-Storo-Baitoni-Ponte Caffaro', 'None'),
 (159, 'B209', 'Ponte Arche-Lundo', 'None'),
@@ -132,10 +115,11 @@ INSERT INTO busses (id, bus_number, bus_name, color) VALUES
 (231, 'B305', 'Rovereto-Mori-Brentonico-Saccone', 'None'),
 (233, 'B319', 'Besagno-Crosano-Cornè-Saccone', 'None'),
 (235, 'B318', 'Valle S.Felice-Manzano-Nomesino', 'None'),
-(503, 'B335', "Rovereto-Ala-Masi d'Avio-Avio-Rovereto", 'None'),
+(503, 'B335', 'Rovereto-Ala-Masi d'Avio-Avio-Rovereto', 'None'),
 (507, 'B334', 'Rovereto-Ala-Sabbionara-Avio-Masi-Rovereto', 'None'),
 (526, 'B329', 'Pergine-Calceranica-Bosentino-V.Vattaro', 'None'),
 (567, 'B328', 'Trento-Pergine-Caldonazzo-Monterovere-Luserna', 'None'),
+(580, 'B336', 'Ala-Ronchi di Ala-Ponzolotti', 'None'),
 (634, 'B332', 'Rovereto-Mori-Riva-Arco-Bolognano', 'None'),
 (309, 'B425', 'Pergine Vals.-Masetti-Assizzi-Vignola-Falesina', 'None'),
 (494, 'B403', 'Trento - Pergine - Baselga di Pinè - Montesover', 'None'),
@@ -153,6 +137,7 @@ INSERT INTO busses (id, bus_number, bus_name, color) VALUES
 (552, 'B466', 'Linea 6 Pergine Valsugana-Costasavina-Roncogno', 'None'),
 (554, 'B464', 'Linea 4 Pergine Valsugana - Ischia', 'None'),
 (556, 'B463', 'Linea 3 Pergine Valsugana-Masetti-Assizzi-Zava', 'None'),
+(562, 'B465', 'Linea 5 Pergine V-Susà-S.Vito-Canale-S.Caterina', 'None'),
 (640, 'B468', 'Linea 8: Pergine I.-Ospedale Villa Rosa-Zivignago', 'None'),
 (568, 'G', 'Gardolo Gardolo Di Mezzo E Spini', 'None'),
 (570, 'CM', 'Povo Borino Celva Passo Cimirlo', 'None'),
@@ -174,6 +159,7 @@ INSERT INTO busses (id, bus_number, bus_name, color) VALUES
 (592, '4', 'Villa Lag. Brione Staz. Isera Lenzima', 'None'),
 (582, '2', 'Nomi Villa Lagarina Stazione Mori', 'None'),
 (601, 'P', 'Castellano Molini Villa Lagarina', 'None'),
-(562, 'A', 'Brione Cesari Ospedale Podestà Brione', 'None'),
+(562, 'A', 'Brione Cesari Ospedale Podesta' Brione', 'None'),
 (598, 'V', 'Volano Besenello Calliano Nomi', 'None'),
-(578, '1', '(Volano) Bettini Staz. Lizzana Marco', 'None');
+(578, '1', '(Volano) Bettini Staz. Lizzana Marco', 'None'),
+(580, '6', 'Costa Corso Rosmini S.Giorgio/Ospedale', 'None'),

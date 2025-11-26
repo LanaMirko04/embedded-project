@@ -1,3 +1,5 @@
+from flaskr import create_app
+from flaskr.db import get_db
 import functools
 import requests
 from requests.auth import HTTPBasicAuth
@@ -38,22 +40,60 @@ def get_stops():
     else:
         return {'error': 'Failed to fetch stops'}, tt_response.status_code
     
+@bp.route('/bus/getStop/<int:stop_id>', methods=['GET'])
+def get_stop(stop_id):
+    params = {'type': 'U'}
+    tt_response = requests.get(tt_base_url + 'stops', auth=tt_basic_auth, params=params)
+    if tt_response.status_code == 200:
+        for stop in tt_response.json():
+            if stop['stopId'] == stop_id:
+                busList = []
+                for bus in stop['routes']:
+                    busList.append(bus['routeShortName'])
+                response = {'id': stop['stopId'], 'name': stop['stopName'], 'position': {'lat': stop['stopLat'], 'lon': stop['stopLon']}, 'buses': busList}
+                return response, 200
+        return {'error': 'Stop not found'}, 404
+    else:
+        return {'error': 'Failed to fetch stops'}, tt_response.status_code
+
 # Bus Routes endpoint
 @bp.route('/bus/getRoutes', methods=['GET'])
 def get_routes():
-    response = requests.get(tt_base_url + 'routes', auth=tt_basic_auth)
-    if response.status_code == 200:
-        return response.json(), 200
-    else:
-        return {'error': 'Failed to fetch routes'}, response.status_code
+    db = get_db()
+    routes = db.execute('SELECT id, bus_number, bus_name, color FROM busses').fetchall()
+    response = []
+    for route in routes:
+        response.append({
+            'id': route['id'],
+            'bus_number': route['bus_number'],
+            'bus_name': route['bus_name'],
+            'color': route['color']
+        })
+    return response, 200
+
+@bp.route('/bus/getRoute/<int:route_id>', methods=['GET'])
+def get_route(route_id):
+    db = get_db()
+    route = db.execute(
+        'SELECT id, bus_number, bus_name, color FROM busses WHERE id = ?',
+        (route_id,)
+    ).fetchone()
+
+    if route is None:
+        return {'error': 'Route not found'}, 404
+
+    response = {
+        'id': route['id'],
+        'bus_number': route['bus_number'],
+        'bus_name': route['bus_name'],
+        'color': route['color']
+    }
+    return response, 200
     
 # Bus Trips Endpoint
-@bp.route('/bus/getTrips', methods=['GET'])
-def get_trips():
-    stopId = request.args.get('stopId')
-    if not stopId:
-        return {'error': 'stopId parameter is required'}, 400
-    
+@bp.route('/bus/getTrips/<int:stopId>', methods=['GET'])
+def get_trips(stopId):
+
     params = {
         'stopId': stopId,
         'type': 'U',
@@ -76,6 +116,3 @@ def get_trips():
         return response, 200
     else:
         return {'error': 'Failed to fetch trips'}, tt_response.status_code
-    
-
-    # num bus, colore, delay, nome, oraArrivoEffettivaAFermataSelezionata
