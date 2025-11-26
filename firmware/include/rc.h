@@ -22,6 +22,8 @@
 
 #define RC_FSM_ERR_INVALID_NEXT_STATE 0x201 /*!< Invalid FSM next state */
 
+#define RC_IO_ERR 0x301
+
 #ifdef __cplusplus
 extern "C" {
 #endif /*! __cplusplus */

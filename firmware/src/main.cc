@@ -8,31 +8,23 @@
  * \brief           CYD main program.
  */
 
-#include <string.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/event_groups.h"
-#include "esp_system.h"
-#include "esp_wifi.h"
+/*! Sdrumo Modules */
+#include "net.h"
+/*! ESP-IDF Libraries */
 #include "esp_event.h"
+#include "esp_system.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
 
-#include "lwip/err.h"
-#include "lwip/sys.h"
-
-#include "net.h"
-
-#define TAG "MAIN"
+static const char *MAIN_TAG = "SDRUMO_MAIN";
 
 static void prv_main_init(void);
 
 extern "C" void app_main(void) {
-    ESP_LOGI(TAG, "DIO NEGRO");
     prv_main_init();
 
-    // while (1)
-    //     ;
+    while (1)
+        ;
 }
 
 static void prv_main_init(void) {
@@ -43,5 +35,6 @@ static void prv_main_init(void) {
     }
     ESP_ERROR_CHECK(ret);
 
-    net_init("Xperia Celli", "celliwifi");
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+    net_init();
 }
