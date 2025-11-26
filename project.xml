@@ -1,6 +1,6 @@
 <project name="ui">
     <folders>
-        <folder path="ui" />
+        <folder path="firmware/ui" />
     </folders>
 
     <targets>
