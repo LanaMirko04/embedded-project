@@ -1,5 +1,5 @@
 /*!
- * \file            main.h
+ * \file            main.c
  * \date            2025-10-16
  * \author          Giulia Cristofolini [giulia.cristofolini@studenti.unitn.it]
  *                  Mirko Lana [lana.mirko@icloud.com]
@@ -24,7 +24,7 @@ extern "C" void app_main(void) {
     prv_main_init();
 
     while (1)
-        ;
+        vTaskDelay(10 / portTICK_PERIOD_MS);
 }
 
 static void prv_main_init(void) {
@@ -36,5 +36,6 @@ static void prv_main_init(void) {
     ESP_ERROR_CHECK(ret);
 
     ESP_ERROR_CHECK(esp_event_loop_create_default());
-    net_init();
+    NetHandler::get_instance().init_connection();
+    // net_init();
 }

@@ -13,16 +13,17 @@
 
 #define RC_ERR_MSG_LEN 128U /*!< Error message buffer length */
 
-#define RC_FAIL -1 /*!< Undefined error */
-#define RC_OK 0    /*!< Everything's OK */
+#define RC_FAIL -1 /*!< Undefined error. */
+#define RC_OK 0    /*!< Everything's OK. */
 
-#define RC_ERR_INVALID_ARG 0x101  /*!< Invalid argument */
-#define RC_ERR_INVALID_SIZE 0x102 /*!< Invalid argument */
-#define RC_ERR_NULL_PTR 0x103     /*!< Unexpected NULL pointer */
+#define RC_ERR_INVALID_ARG 0x101  /*!< Invalid argument error. */
+#define RC_ERR_INVALID_SIZE 0x102 /*!< Invalid size error.  */
+#define RC_ERR_NULL_PTR 0x103     /*!< Unexpected NULL pointer. */
+#define RC_ERR_IO_OPERATION 0x104 /*!< I/O operation error. */
 
-#define RC_FSM_ERR_INVALID_NEXT_STATE 0x201 /*!< Invalid FSM next state */
+#define RC_FSM_ERR_INVALID_NEXT_STATE 0x201 /*!< Invalid FSM next state. */
 
-#define RC_IO_ERR 0x301
+#define RC_NET_NO_STORED_CONN 0x301 /*!< No stored connection. */
 
 #ifdef __cplusplus
 extern "C" {
