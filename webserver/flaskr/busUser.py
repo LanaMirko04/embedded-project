@@ -4,27 +4,24 @@ import requests
 from requests.auth import HTTPBasicAuth
 from datetime import datetime, timezone
 import json
+from dotenv import load_dotenv
+import os
 
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
 from werkzeug.security import check_password_hash, generate_password_hash
 
-bp = Blueprint('api', __name__, url_prefix='/api')
+bp = Blueprint('bus', __name__)
 
 # Configuration for Trentino Trasporti API
-tt_base_url = 'https://app-tpl.tndigit.it/gtlservice/'
-tt_basic_auth = HTTPBasicAuth('mittmobile','ecGsp.RHB3')
-
-# Status endpoint
-@bp.route('/status', methods=['GET'])
-def status():
-    return {'status': 'ok'}, 200
+tt_base_url = os.getenv('TT_BASE_URL', 'https://app-tpl.tndigit.it/gtlservice/')
+tt_basic_auth = HTTPBasicAuth(os.getenv('TT_BASIC_AUTH_USER'), os.getenv('TT_BASIC_AUTH_PASS'))
 
 # Trentino Trasporti
 
 # Bus Stops endpoint
-@bp.route('/bus/getStops', methods=['GET'])
+@bp.route('/getStops', methods=['GET'])
 def get_stops():
     params = {'type': 'U'}
     tt_response = requests.get(tt_base_url + 'stops', auth=tt_basic_auth, params=params)
@@ -39,7 +36,7 @@ def get_stops():
     else:
         return {'error': 'Failed to fetch stops'}, tt_response.status_code
     
-@bp.route('/bus/getStop/<int:stop_id>', methods=['GET'])
+@bp.route('/getStop/<int:stop_id>', methods=['GET'])
 def get_stop(stop_id):
     params = {'type': 'U'}
     tt_response = requests.get(tt_base_url + 'stops', auth=tt_basic_auth, params=params)
@@ -56,7 +53,7 @@ def get_stop(stop_id):
         return {'error': 'Failed to fetch stops'}, tt_response.status_code
 
 # Bus Routes endpoint
-@bp.route('/bus/getRoutes', methods=['GET'])
+@bp.route('/getRoutes', methods=['GET'])
 def get_routes():
     db = get_db()
     routes = db.execute('SELECT id, bus_number, bus_name, color FROM busses').fetchall()
@@ -70,7 +67,7 @@ def get_routes():
         })
     return response, 200
 
-@bp.route('/bus/getRoute/<int:route_id>', methods=['GET'])
+@bp.route('/getRoute/<int:route_id>', methods=['GET'])
 def get_route(route_id):
     db = get_db()
     route = db.execute(
@@ -90,7 +87,7 @@ def get_route(route_id):
     return response, 200
     
 # Bus Trips Endpoint
-@bp.route('/bus/getTrips/<int:stopId>', methods=['GET'])
+@bp.route('/getTrips/<int:stopId>', methods=['GET'])
 def get_trips(stopId):
 
     params = {
