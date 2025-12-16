@@ -11,12 +11,14 @@
 #ifndef NET_H
 #define NET_H
 
-/*! ESP-IDF Libraies */
+/*! ESP-IDF Components */
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
+#include "esp_wifi.h"
 #include "esp_event.h"
 /*! Standard Library */
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <array>
@@ -53,7 +55,7 @@ class NetHandler {
     static NetHandler &get_instance(void);
 
     /*!
-     * \brief       Initializes the Wi-Fi subsistem and attempts to connect.
+     * \brief       Initializes the Wi-Fi subsystem and attempts to connect.
      */
     void init_connection(void);
 
@@ -63,13 +65,17 @@ class NetHandler {
     void deinit_connection(void);
 
   private:
-    static constexpr std::size_t SSID_SIZE = 33U;     /*!< SSID max lenght. */
-    static constexpr std::size_t PASSWORD_SIZE = 65U; /*!< Password max lenght. */
+    static constexpr std::size_t SSID_SIZE = 33U;     /*!< SSID max length. */
+    static constexpr std::size_t PASSWORD_SIZE = 65U; /*!< Password max length. */
     static constexpr std::size_t RVD_DATA_SIZE = 33U; /*!< Received-Value-Data size. */
 
-    EventGroupHandle_t event_group;
+    EventGroupHandle_t event_group; /*!< Event group handle for Wi-Fi events. */
+    esp_netif_t *sta_netif; /*!< Station network interface handle. */
     std::array<char, SSID_SIZE> ssid;         /*!< Buffer storing loaded/received Wi-Fi SSID. */
     std::array<char, PASSWORD_SIZE> password; /*!< Buffer storing loaded/received Wi-Fi password. */
+    std::atomic_size_t retry_count; /*!< Retry count for Wi-Fi connection attempts. */
+    std::atomic_bool smartconfig_running; /*!< Flag indicating if SmartConfig is running. */
+    std::atomic_bool came_from_smartconfig; /*!< Flag indicating if connection came from SmartConfig. */
 
     /*!
      * \brief       Wi-Fi and SmartConfig event handler callback.
@@ -93,12 +99,13 @@ class NetHandler {
      */
     NetHandler();
 
-    /*
+    /*!
      * \brief       Loads Wi-Fi credentials from NVS.
+     *
      * \return      int RC_OK on success, an error code otherwise:
      *              - RC_ERR_IO_OPERATION on storage error.
      *              - RC_NET_NO_STORED_CONN if no credential exist;
-     *              - RC_FAIL id an unknown error occurs.
+     *              - RC_FAIL if an unknown error occurs.
      */
     int load_connection_info(void);
 
