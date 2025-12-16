@@ -1,5 +1,5 @@
 /*!
- * \file            main.c
+ * \file            main.cpp
  * \date            2025-10-16
  * \author          Giulia Cristofolini [giulia.cristofolini@studenti.unitn.it]
  *                  Mirko Lana [lana.mirko@icloud.com]
@@ -37,5 +37,4 @@ static void prv_main_init(void) {
 
     ESP_ERROR_CHECK(esp_event_loop_create_default());
     NetHandler::get_instance().init_connection();
-    // net_init();
 }
