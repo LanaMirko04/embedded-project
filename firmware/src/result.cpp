@@ -13,8 +13,12 @@
 #include <cstdio>
 #include <cstdarg>
 #include <array>
+#include <string>
 
-static std::array<char, RESULT_MESSAGE_SIZE> return_err_msg; /*!< The error message buffer */
+/*!
+ * \brief           The error message buffer.
+ */
+static std::array<char, RESULT_MESSAGE_SIZE> return_err_msg;
 
 Result result_set_err_msg(const char *fmt, ...) {
     if (!fmt)
@@ -33,4 +37,27 @@ Result result_set_err_msg(const char *fmt, ...) {
 
 const char *result_get_err_msg(void) {
     return return_err_msg.data();
+}
+
+std::string result_to_str(Result result) {
+    switch (result) {
+        case Result::SUCCESS:
+            return "SUCCESS";
+
+        case Result::INVALID_ARGUMENT:
+            return "INVALID_ARGUMENT";
+
+        case Result::WRONG_SIZE:
+            return "WRONG_SIZE";
+
+        case Result::UNEXPECTED_NULL_POINTER:
+            return "UNEXPECTED_NULL_POINTER";
+
+        case Result::INVALID_NEXT_STATE:
+            return "INVALID_NEXT_STATE";
+
+        case Result::UNKNOWN_ERROR:
+        default:
+            return "UNKNOWN_ERROR";
+    }
 }

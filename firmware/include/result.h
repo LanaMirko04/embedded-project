@@ -12,6 +12,7 @@
 #define RESULT_H
 
 #include <cstddef>
+#include <string>
 
 /*!
  * \brief           Error message buffer length.
@@ -62,8 +63,16 @@ Result result_set_err_msg(const char *fmt, ...);
 /*!
  * \brief           Get the error message.
  *
- * \return          The pointer to the error message.
+ * \return          char* The pointer to the error message.
  */
 const char *result_get_err_msg(void);
+
+/*!
+ * \brief           Convert a Result enum value to a string.
+ *
+ * \param[in]       result The Result enum value.
+ * \return          std::string The string representation of the Result enum value.
+ */
+std::string result_to_str(Result result);
 
 #endif /*! RESULT_H */
