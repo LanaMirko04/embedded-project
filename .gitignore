@@ -267,6 +267,7 @@ pyrightconfig.json
 .libdeps/
 platformio.ini
 compile_flags.txt
+.clangd
 
 ### VisualStudioCode ###
 **/.vscode/*
