@@ -23,5 +23,7 @@
 		<!-- Add <bin> , <tiny_ttf>, <freetype> tags here -->
 		<bin name="font_medium" as_file="false" src_path="fonts/Montserrat_Medium.ttf" size="20" bpp="4" />
 		<bin name="Poppins_medium_48" as_file="false" src_path="fonts/Poppins-Medium.ttf" size="48" bpp="4" />
+		<bin name="Poppins_bold_28" as_file="false" src_path="fonts/Poppins-Bold.ttf" size="28" bpp="4" />
+		<bin name="Poppins_regular_14" as_file="false" src_path="fonts/Poppins-Regular.ttf" size="14" bpp="4" />
 	</fonts>
 </globals>

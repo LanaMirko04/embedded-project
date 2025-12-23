@@ -47,6 +47,11 @@
  * Fonts
  *----------------*/
 
+lv_font_t * font_medium;
+extern lv_font_t font_medium_data;
+lv_font_t * Poppins_medium_48;
+extern lv_font_t Poppins_medium_48_data;
+
 /*----------------
  * Images
  *----------------*/
@@ -75,6 +80,11 @@ void ui_1_init_gen(const char * asset_path)
      * Fonts
      *----------------*/
 
+    /* get font 'font_medium' from a C array */
+    font_medium = &font_medium_data;
+    /* get font 'Poppins_medium_48' from a C array */
+    Poppins_medium_48 = &Poppins_medium_48_data;
+
 
     /*----------------
      * Images
@@ -90,6 +100,8 @@ void ui_1_init_gen(const char * asset_path)
     /* Register widgets */
 
     /* Register fonts */
+    lv_xml_register_font(NULL, "font_medium", font_medium);
+    lv_xml_register_font(NULL, "Poppins_medium_48", Poppins_medium_48);
 
     /* Register subjects */
 

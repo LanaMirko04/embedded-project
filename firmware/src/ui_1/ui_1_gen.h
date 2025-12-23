@@ -47,6 +47,10 @@ extern "C" {
  * Fonts
  *----------------*/
 
+extern lv_font_t * font_medium;
+
+extern lv_font_t * Poppins_medium_48;
+
 /*----------------
  * Images
  *----------------*/
@@ -78,7 +82,7 @@ void ui_1_init_gen(const char * asset_path);
  **********************/
 
 /*Include all the widget and components of this library*/
-#include "screens/screen_hello_world_gen.h"
+#include "screens/sdrumo_opening_screen_gen.h"
 
 #ifdef __cplusplus
 } /*extern "C"*/

@@ -1,9 +1,9 @@
 /**
- * @file screen_hello_world_gen.h
+ * @file sdrumo_opening_screen_gen.h
  */
 
-#ifndef SCREEN_HELLO_WORLD_H
-#define SCREEN_HELLO_WORLD_H
+#ifndef SDRUMO_OPENING_SCREEN_H
+#define SDRUMO_OPENING_SCREEN_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,7 +33,7 @@ extern "C" {
 
 
 
-lv_obj_t * screen_hello_world_create(void);
+lv_obj_t * sdrumo_opening_screen_create(void);
 
 /**********************
  *      MACROS
@@ -43,4 +43,4 @@ lv_obj_t * screen_hello_world_create(void);
 } /*extern "C"*/
 #endif
 
-#endif /*SCREEN_HELLO_WORLD_H*/
+#endif /*SDRUMO_OPENING_SCREEN_H*/
