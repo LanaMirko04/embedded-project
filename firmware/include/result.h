@@ -12,7 +12,7 @@
 #define RESULT_H
 
 #include <cstddef>
-#include <string>
+#include <string_view>
 
 /*!
  * \brief           Error message buffer length.
@@ -20,7 +20,7 @@
 constexpr std::size_t RESULT_MESSAGE_SIZE = 128U;
 
 /*!
- * \brief           An enum class representing all possible return values.
+ * \brief           An enum class representing all possible retval values.
  */
 enum class Result {
     /*!
@@ -39,11 +39,13 @@ enum class Result {
      */
 
     /*!
-      * \defgroup      FSMResultCodes FSM Result Codes
-      * @{
-      */
+     * \defgroup      FSMResultCodes FSM Result Codes
+     * @{
+     */
 
-    INVALID_NEXT_STATE, /*!< Invalid FSM next state */
+    ACTION_ALREADY_REGISTERED, /*!< Action already registered */
+    ACTION_NOT_REGISTERED,     /*!< Action not registered */
+    INVALID_NEXT_STATE,        /*!< Invalid FSM next state */
 
     /*!
      * @}
@@ -55,7 +57,7 @@ enum class Result {
  *
  * \param[in]       fmt Format string.
  * \param[in]       ... variable arguments.
- * \return          Result SUCCESS on success, an error code otherwise.
+ * \retval          Result SUCCESS on success, an error code otherwise.
  *                  - UNKNOWN_ERROR if an error occurs while.
  */
 Result result_set_err_msg(const char *fmt, ...);
@@ -63,7 +65,7 @@ Result result_set_err_msg(const char *fmt, ...);
 /*!
  * \brief           Get the error message.
  *
- * \return          char* The pointer to the error message.
+ * \retval          char* The pointer to the error message.
  */
 const char *result_get_err_msg(void);
 
@@ -71,8 +73,8 @@ const char *result_get_err_msg(void);
  * \brief           Convert a Result enum value to a string.
  *
  * \param[in]       result The Result enum value.
- * \return          std::string The string representation of the Result enum value.
+ * \retval          std::string The string representation of the Result enum value.
  */
-std::string result_to_str(Result result);
+constexpr std::string_view result_to_str(Result result);
 
 #endif /*! RESULT_H */

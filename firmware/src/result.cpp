@@ -13,7 +13,7 @@
 #include <cstdio>
 #include <cstdarg>
 #include <array>
-#include <string>
+#include <string_view>
 
 /*!
  * \brief           The error message buffer.
@@ -39,7 +39,7 @@ const char *result_get_err_msg(void) {
     return return_err_msg.data();
 }
 
-std::string result_to_str(Result result) {
+constexpr std::string_view result_to_str(Result result) {
     switch (result) {
         case Result::SUCCESS:
             return "SUCCESS";
@@ -52,6 +52,12 @@ std::string result_to_str(Result result) {
 
         case Result::UNEXPECTED_NULL_POINTER:
             return "UNEXPECTED_NULL_POINTER";
+
+        case Result::ACTION_ALREADY_REGISTERED:
+            return "ACTION_ALREADY_REGISTERED";
+
+        case Result::ACTION_NOT_REGISTERED:
+            return "ACTION_NOT_REGISTERED";
 
         case Result::INVALID_NEXT_STATE:
             return "INVALID_NEXT_STATE";
