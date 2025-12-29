@@ -30,9 +30,11 @@ enum class Result {
 
     SUCCESS,                 /*!< Everything's OK */
     UNKNOWN_ERROR,           /*!< Unknown error */
-    INVALID_ARGUMENT,        /*!< Invalid argument */
+    INVALID_ARGUMENT,        /*!< Invalid argument passed to function */
     WRONG_SIZE,              /*!< Wrong size */
     UNEXPECTED_NULL_POINTER, /*!< Unexpected NULL pointer */
+    IO_ERROR,                /*!< I/O error */
+    NOT_FOUND,               /*!< When a resource is not found */
 
     /*!
      * @}
