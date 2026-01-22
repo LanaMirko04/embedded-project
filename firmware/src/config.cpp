@@ -50,12 +50,12 @@ Result Config::set_ssid(const char *ssid, std::size_t len) {
         return Result::INVALID_ARGUMENT;
     }
 
+    memset(this->ssid, 0, Config::SSID_SIZE);
     if (!strncpy(this->ssid, ssid, len)) {
         result_set_err_msg("An error occurred during strncpy(): %s", strerror(errno));
         return Result::UNEXPECTED_NULL_POINTER;
     }
 
-    this->ssid[len] = 0;
     return Result::SUCCESS;
 }
 
@@ -70,12 +70,12 @@ Result Config::set_password(const char *password, std::size_t len) {
         return Result::INVALID_ARGUMENT;
     }
 
+    memset(this->password, 0, Config::PASSWORD_SIZE);
     if (!strncpy(this->password, password, len)) {
         result_set_err_msg("An error occurred during strncpy(): %s", strerror(errno));
         return Result::UNEXPECTED_NULL_POINTER;
     }
 
-    this->password[len] = 0;
     return Result::SUCCESS;
 }
 
@@ -93,6 +93,7 @@ Result Config::load(void) {
     }
 
     std::size_t len;
+    memset(this->ssid, 0U, Config::SSID_SIZE);
     res = nvs_get_str(nvs, Config::NVS_SSID_KEY, this->ssid, &len);
     if (res != ESP_OK) {
         result_set_err_msg("Error (%s) reading SSID", esp_err_to_name(res));
@@ -100,6 +101,7 @@ Result Config::load(void) {
         return Result::IO_ERROR;
     }
 
+    memset(this->password, 0, Config::PASSWORD_SIZE);
     res = nvs_get_str(nvs, Config::NVS_PASSWORD_KEY, this->password, &len);
     if (res != ESP_OK) {
         result_set_err_msg("Error (%s) reading password", esp_err_to_name(res));
@@ -151,6 +153,12 @@ Result Config::store(void) {
         result_set_err_msg("Error (%s) saving password!", esp_err_to_name(res));
         nvs_close(nvs);
         return Result::IO_ERROR;
+    }
+
+    if (this->version == 0U) {
+        ESP_LOGW(CONFIG_TAG, "No loaded configuration");
+        nvs_close(nvs);
+        return Result::SUCCESS;
     }
 
     res = nvs_set_u32(nvs, Config::NVS_VERSION_KEY, this->version);

@@ -10,6 +10,7 @@
 
 /*! Sdrumo Modules */
 #include "net.h"
+#include "config.h"
 #include "result.h"
 /*! ESP-IDF Components */
 #include "freertos/FreeRTOS.h"
@@ -25,105 +26,27 @@
 #include "esp_smartconfig.h"
 #include "nvs.h"
 /*! Standard Library */
+#include <algorithm>
 #include <cassert>
 #include <atomic>
+#include <cstring>
 
-NetHandler::NetHandler() : event_group(nullptr), retry_count(0U), smartconfig_running(false), came_from_smartconfig(false) {
-    this->event_group = nullptr;
-    this->ssid.fill(0U);
-    this->password.fill(0U);
-}
+constexpr std::size_t NET_SSID_SIZE = 33U;
+constexpr std::size_t NET_PASSWORD_SIZE = 65U;
 
-Result NetHandler::load_credentials(void) {
-    if (this->ssid.at(0U) != 0U || this->password.at(0U) != 0U) {
-        ESP_LOGW(NET_TAG.data(), "Connection information already loaded!");
-        return Result::SUCCESS;
-    }
-
-    nvs_handle_t nvs_handle;
-    int res = nvs_open(NET_NVS_NAMESPACE.data(), NVS_READONLY, &nvs_handle);
-    if (res != ESP_OK) {
-        result_set_err_msg("Error (%s) opening the storage", esp_err_to_name(res));
-        return Result::IO_ERROR;
-    }
-
-    std::size_t ssid_len = NetHandler::SSID_SIZE - 1;
-    res = nvs_get_str(nvs_handle, NET_NVS_SSID_KEY.data(), this->ssid.data(), &ssid_len);
-    switch (res) {
-        case ESP_OK:
-            ESP_LOGI(NET_TAG.data(), "SSID read!");
-            break;
-
-        case ESP_ERR_NVS_NOT_FOUND:
-            ESP_LOGW(NET_TAG.data(), "The SSID is not initialized yet!");
-            return Result::NOT_FOUND;
-
-        default:
-            result_set_err_msg("Error (%s) reading!", esp_err_to_name(res));
-            nvs_close(nvs_handle);
-            return Result::UNKNOWN_ERROR;
-    }
-
-    std::size_t password_len = NetHandler::PASSWORD_SIZE - 1;
-    res = nvs_get_str(nvs_handle, NET_NVS_PASSWORD_KEY.data(), this->password.data(), &password_len);
-    switch (res) {
-        case ESP_OK:
-            ESP_LOGI(NET_TAG.data(), "Password read!");
-            break;
-
-        case ESP_ERR_NVS_NOT_FOUND:
-            ESP_LOGW(NET_TAG.data(), "The password is not initialized yet!");
-            return Result::NOT_FOUND;
-
-        default:
-            result_set_err_msg("Error (%s) reading!", esp_err_to_name(res));
-            nvs_close(nvs_handle);
-            return Result::UNKNOWN_ERROR;
-    }
-
-    nvs_close(nvs_handle);
-
-    ESP_LOGI(NET_TAG.data(), "Loaded credentials { SSID=%s,\tPassword=%s }", this->ssid.data(), this->password.data());
-
-    return Result::SUCCESS;
-}
-
-Result NetHandler::store_credentials(void) {
-    nvs_handle_t nvs_handle;
-    int res = nvs_open(NET_NVS_NAMESPACE.data(), NVS_READWRITE, &nvs_handle);
-    if (res != ESP_OK) {
-        result_set_err_msg("Error (%s) opening the storage", esp_err_to_name(res));
-        return Result::IO_ERROR;
-    }
-
-    res = nvs_set_str(nvs_handle, NET_NVS_SSID_KEY.data(), this->ssid.data());
-    if (res != ESP_OK) {
-        result_set_err_msg("Error (%s) saving SSID!", esp_err_to_name(res));
-        nvs_close(nvs_handle);
-        return Result::IO_ERROR;
-    }
-
-    res = nvs_set_str(nvs_handle, NET_NVS_PASSWORD_KEY.data(), this->password.data());
-    if (res != ESP_OK) {
-        result_set_err_msg("Error (%s) saving password!", esp_err_to_name(res));
-        nvs_close(nvs_handle);
-        return Result::IO_ERROR;
-    }
-
-    nvs_close(nvs_handle);
-    return Result::SUCCESS;
-}
+static const char *NET_TAG = "NET";
 
 void NetHandler::event_handler(void *arg, esp_event_base_t event_base, std::int32_t event_id, void *event_data) {
     NetHandler &net = NetHandler::get_instance();
+    Config &config = Config::get_instance();
 
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
-        ESP_LOGI(NET_TAG.data(), "WiFi STA started");
+        ESP_LOGI(NET_TAG, "WiFi STA started");
 
-        if (!net.smartconfig_running && net.ssid.at(0U) != 0U && net.password.at(0U) != 0U) {
+        if (!net.smartconfig_running && config.get_ssid() != 0U && config.get_password() != 0U) {
             esp_wifi_connect();
         } else {
-            ESP_LOGI(NET_TAG.data(), "SmartConfig running, skip auto-connect");
+            ESP_LOGI(NET_TAG, "SmartConfig running, skip auto-connect");
         }
 
         return;
@@ -134,11 +57,11 @@ void NetHandler::event_handler(void *arg, esp_event_base_t event_base, std::int3
 
         if (net.retry_count < NET_MAX_RETRY) {
             ++net.retry_count;
-            ESP_LOGW(NET_TAG.data(), "WiFi disconnected, retry %zu/%zu", net.retry_count.load(), NET_MAX_RETRY);
+            ESP_LOGW(NET_TAG, "WiFi disconnected, retry %zu/%zu", net.retry_count.load(), NET_MAX_RETRY);
 
             esp_wifi_connect();
         } else {
-            ESP_LOGE(NET_TAG.data(), "Max retries reached, starting SmartConfig");
+            ESP_LOGE(NET_TAG, "Max retries reached, starting SmartConfig");
 
             if (!net.smartconfig_running) {
                 net.smartconfig_running = true;
@@ -151,43 +74,51 @@ void NetHandler::event_handler(void *arg, esp_event_base_t event_base, std::int3
     }
 
     if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
-        ESP_LOGI(NET_TAG.data(), "Connected to AP \"%s\"", net.ssid.data());
+        ESP_LOGI(NET_TAG, "Connected to AP \"%s\"", config.get_ssid());
 
         net.retry_count = 0;
         xEventGroupSetBits(net.event_group, NET_CONNECTED_BIT);
 
         /*! Save credentials ONLY if they came from SmartConfig */
         if (net.came_from_smartconfig) {
-            ESP_LOGI(NET_TAG.data(), "Storing WiFi credentials");
-            net.store_credentials();
+            ESP_LOGI(NET_TAG, "Storing WiFi credentials");
             net.came_from_smartconfig = false;
         }
         return;
     }
 
     if (event_base == SC_EVENT && event_id == SC_EVENT_SCAN_DONE) {
-        ESP_LOGI(NET_TAG.data(), "SmartConfig scan done");
+        ESP_LOGI(NET_TAG, "SmartConfig scan done");
         return;
     }
 
     if (event_base == SC_EVENT && event_id == SC_EVENT_FOUND_CHANNEL) {
-        ESP_LOGI(NET_TAG.data(), "SmartConfig channel found");
+        ESP_LOGI(NET_TAG, "SmartConfig channel found");
         return;
     }
 
     if (event_base == SC_EVENT && event_id == SC_EVENT_GOT_SSID_PSWD) {
-        ESP_LOGI(NET_TAG.data(), "SmartConfig received credentials");
+        ESP_LOGI(NET_TAG, "SmartConfig received credentials");
 
         auto *evt =
             static_cast<smartconfig_event_got_ssid_pswd_t *>(event_data);
 
-        std::copy(evt->ssid, evt->ssid + SSID_SIZE - 1, net.ssid.begin());
-        std::copy(evt->password, evt->password + PASSWORD_SIZE - 1, net.password.begin());
+        // std::copy(evt->ssid, evt->ssid + SSID_SIZE - 1, config.get_ssid.begin());
+        // std::copy(evt->password, evt->password + PASSWORD_SIZE - 1, config.get_password().begin());
+
+        char ssid[33U] = { 0 };
+        char password[65U] = { 0 };
+        memcpy(ssid, evt->ssid, sizeof(evt->ssid));
+        memcpy(password, evt->password, sizeof(evt->password));
+
+        config.set_ssid(ssid, NET_SSID_SIZE);
+        config.set_password(password, NET_PASSWORD_SIZE);
+        config.store();
 
         if (evt->type == SC_TYPE_ESPTOUCH_V2) {
             uint8_t rvd[RVD_DATA_SIZE] = {};
             ESP_ERROR_CHECK(esp_smartconfig_get_rvd_data(rvd, sizeof(rvd)));
-            ESP_LOGI(NET_TAG.data(), "RVD data received");
+            ESP_LOGI(NET_TAG, "RVD data received");
         }
 
         wifi_config_t cfg = {};
@@ -201,7 +132,7 @@ void NetHandler::event_handler(void *arg, esp_event_base_t event_base, std::int3
     }
 
     if (event_base == SC_EVENT && event_id == SC_EVENT_SEND_ACK_DONE) {
-        ESP_LOGI(NET_TAG.data(), "SmartConfig completed");
+        ESP_LOGI(NET_TAG, "SmartConfig completed");
 
         esp_smartconfig_stop();
         net.smartconfig_running = false;
@@ -221,10 +152,10 @@ void NetHandler::smartconfig_task(void *args) {
     while (true) {
         bits = xEventGroupWaitBits(net_handler.event_group, NET_CONNECTED_BIT | NET_ESPTOUCH_DONE_BIT, true, false, portMAX_DELAY);
         if (bits & NET_CONNECTED_BIT) {
-            ESP_LOGI(NET_TAG.data(), "WiFi Connected to ap");
+            ESP_LOGI(NET_TAG, "WiFi Connected to ap");
         }
         if (bits & NET_ESPTOUCH_DONE_BIT) {
-            ESP_LOGI(NET_TAG.data(), "Smartconfig over");
+            ESP_LOGI(NET_TAG, "Smartconfig over");
             esp_smartconfig_stop();
             vTaskDelete(nullptr);
         }
@@ -238,6 +169,7 @@ NetHandler &NetHandler::get_instance(void) {
 
 void NetHandler::init_connection(void) {
     static bool netif_initialized = false;
+    Config &config = Config::get_instance();
 
     if (!netif_initialized) {
         ESP_ERROR_CHECK(esp_netif_init());
@@ -263,14 +195,13 @@ void NetHandler::init_connection(void) {
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
 
-    Result res = this->load_credentials();
-    if (res == Result::SUCCESS) {
+    if (config.get_ssid()[0U] && config.get_password()[0U]) {
         wifi_config_t cfg = {};
-        memcpy(cfg.sta.ssid, this->ssid.data(), SSID_SIZE - 1);
-        memcpy(cfg.sta.password, this->password.data(), PASSWORD_SIZE - 1);
+        memcpy(cfg.sta.ssid, config.get_ssid(), NET_SSID_SIZE - 1);
+        memcpy(cfg.sta.password, config.get_password(), NET_PASSWORD_SIZE - 1);
         ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &cfg));
-    } else if (res != Result::NOT_FOUND) {
-        ESP_LOGE(NET_TAG.data(), "Failed to load Wi-Fi credentials: %s", result_get_err_msg());
+    } else {
+        ESP_LOGE(NET_TAG, "Failed to load Wi-Fi credentials: %s", result_get_err_msg());
         abort();
     }
 
@@ -303,5 +234,5 @@ void NetHandler::deinit_connection(void) {
     this->retry_count = 0;
     this->came_from_smartconfig = false;
 
-    ESP_LOGI(NET_TAG.data(), "Network deinitialized successfully");
+    ESP_LOGI(NET_TAG, "Network deinitialized successfully");
 }

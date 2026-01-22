@@ -23,16 +23,10 @@
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
-#include <array>
-#include <string_view>
 
-constexpr std::string_view NET_TAG = "SDRUMO_NET";            /*!< Network module logging tag. */
-constexpr std::size_t NET_MAX_RETRY = 5U;                     /*!< Max number of Wi-Fi connection retries. */
-constexpr int NET_CONNECTED_BIT = BIT0;                       /*!< Bit that indicates that Sdumo got an IP address. */
-constexpr int NET_ESPTOUCH_DONE_BIT = BIT1;                   /*!< Bit that indicates that Sdrumo finished SmartConfig/ESPTouch routine. */
-constexpr std::string_view NET_NVS_NAMESPACE = "storage";     /*!< Non-Volatile Storage partition namespace. */
-constexpr std::string_view NET_NVS_SSID_KEY = "SSID";         /*!< Stored SSID key. */
-constexpr std::string_view NET_NVS_PASSWORD_KEY = "PASSWORD"; /*!< Stored password key. */
+constexpr std::size_t NET_MAX_RETRY = 5U;   /*!< Max number of Wi-Fi connection retries. */
+constexpr int NET_CONNECTED_BIT = BIT0;     /*!< Bit that indicates that Sdumo got an IP address. */
+constexpr int NET_ESPTOUCH_DONE_BIT = BIT1; /*!< Bit that indicates that Sdrumo finished SmartConfig/ESPTouch routine. */
 
 /*!
  * \class           NetHandler
@@ -67,17 +61,13 @@ class NetHandler {
     void deinit_connection(void);
 
   private:
-    static constexpr std::size_t SSID_SIZE = 33U;     /*!< SSID max length. */
-    static constexpr std::size_t PASSWORD_SIZE = 65U; /*!< Password max length. */
     static constexpr std::size_t RVD_DATA_SIZE = 33U; /*!< Received-Value-Data size. */
 
-    EventGroupHandle_t event_group;           /*!< Event group handle for Wi-Fi events. */
-    esp_netif_t *sta_netif;                   /*!< Station network interface handle. */
-    std::array<char, SSID_SIZE> ssid;         /*!< Buffer storing loaded/received Wi-Fi SSID. */
-    std::array<char, PASSWORD_SIZE> password; /*!< Buffer storing loaded/received Wi-Fi password. */
-    std::atomic_size_t retry_count;           /*!< Retry count for Wi-Fi connection attempts. */
-    std::atomic_bool smartconfig_running;     /*!< Flag indicating if SmartConfig is running. */
-    std::atomic_bool came_from_smartconfig;   /*!< Flag indicating if connection came from SmartConfig. */
+    EventGroupHandle_t event_group;         /*!< Event group handle for Wi-Fi events. */
+    esp_netif_t *sta_netif;                 /*!< Station network interface handle. */
+    std::atomic_size_t retry_count;         /*!< Retry count for Wi-Fi connection attempts. */
+    std::atomic_bool smartconfig_running;   /*!< Flag indicating if SmartConfig is running. */
+    std::atomic_bool came_from_smartconfig; /*!< Flag indicating if connection came from SmartConfig. */
 
     /*!
      * \brief       Wi-Fi and SmartConfig event handler callback.
@@ -99,25 +89,8 @@ class NetHandler {
     /*!
      * \brief       Private constructor for the singleton.
      */
-    NetHandler();
-
-    /*!
-     * \brief       Loads Wi-Fi credentials from NVS.
-     *
-     * \return      Result SUCCESS on success, an error code otherwise:
-     *              - IO_ERROR on storage error.
-     *              - NOT_FOUND if no credentials exist;
-     *              - UNKNOWN_ERROR if an unknown error occurs.
-     */
-    Result load_credentials(void);
-
-    /*!
-     * \brief       Stores Wi-Fi credentials into NVS.
-     *
-     * \return      Result SUCCESS on success, an error code otherwise:
-     *              - IO_ERROR on storage error.
-     */
-    Result store_credentials(void);
+    NetHandler() : event_group(nullptr), retry_count(0U), smartconfig_running(false), came_from_smartconfig(false) {
+    }
 };
 
 #endif /*! NET_H */
