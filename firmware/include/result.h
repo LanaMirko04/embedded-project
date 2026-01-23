@@ -52,6 +52,19 @@ enum class Result {
     /*!
      * @}
      */
+
+    /*!
+      * \defgroup      ViewResultCodes View Result Codes
+      * @{
+      */
+
+    ERROR_ALREADY_CREATED, /*!< Object already created */
+    ERROR_NOT_CREATED,     /*!< Object not created */
+
+    /*!
+     * @}
+     */
+
 };
 
 /*!
