@@ -1,5 +1,5 @@
 #include "first_screen.h"
-
+#include "images/clock_screen.c"
 static lv_style_t subtitle_style;
 
 static lv_style_t title_style;
@@ -39,4 +39,14 @@ void draw_wifi_screen(lv_obj_t *screen) {
     lv_label_set_text(label1, "Open EspTouch to configure WiFi");
     lv_obj_add_style(label1, &par_style, LV_STATE_DEFAULT);
     lv_obj_align(label1, LV_ALIGN_CENTER, 0, +30);
+}
+
+void draw_clock_screen(lv_obj_t *screen){
+    lv_obj_t *bg = lv_img_create(screen);
+    lv_img_set_src(bg, &clock_screen);
+
+    lv_obj_set_size(bg, LV_HOR_RES, LV_VER_RES);
+    lv_obj_set_pos(bg, 0, 0);
+
+    lv_obj_clear_flag(bg, LV_OBJ_FLAG_SCROLLABLE);
 }

@@ -38,7 +38,7 @@ static esp_err_t app_lvgl_main(void) {
     lv_obj_set_style_bg_color(scr, lv_color_make(0xF1, 0xEC, 0xE6), LV_STATE_DEFAULT);
     styles_init();
 
-    draw_wifi_screen(scr);
+    draw_clock_screen(scr);
 
     lvgl_port_unlock();
 
