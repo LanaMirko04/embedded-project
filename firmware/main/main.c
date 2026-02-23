@@ -24,7 +24,12 @@
 
 #include "lcd.h"
 #include "touch.h"
-#include "first_screen.h"
+
+#include "styles.h"
+//#include "screen_boot.h"
+//#include "screen_wifi.h"
+//#include "screen_clock.h"
+#include "screen_manager.h"
 
 // Generated UI header (from XML)
 //#include "ui_1.h"
@@ -33,12 +38,12 @@ static const char *TAG = "demo";
 
 static esp_err_t app_lvgl_main(void) {
     lv_obj_t *scr = lv_scr_act();
-
+    
     lvgl_port_lock(0);
     lv_obj_set_style_bg_color(scr, lv_color_make(0xF1, 0xEC, 0xE6), LV_STATE_DEFAULT);
     styles_init();
 
-    draw_clock_screen(scr);
+    screen_manager_init(scr);
 
     lvgl_port_unlock();
 
