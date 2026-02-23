@@ -1,6 +1,10 @@
 #include "screen_clock.h"
 #include "images/clock_screen.c"
 #include "images/timer.c"
+#include "images/alarm.c"
+
+static lv_obj_t *label_timer;
+static lv_obj_t *label_alarm;
 
 void ui_event_clock(lv_event_t *e){
     static uint8_t counter = 0;
@@ -13,7 +17,8 @@ void ui_event_clock(lv_event_t *e){
 
 
 void ui_load_screen_clock(lv_obj_t *screen){
-    //background
+    
+    /* background */
     lv_obj_t *bg = lv_img_create(screen);
     lv_img_set_src(bg, &clock_screen);
 
@@ -22,7 +27,7 @@ void ui_load_screen_clock(lv_obj_t *screen){
 
     lv_obj_clear_flag(bg, LV_OBJ_FLAG_SCROLLABLE);
 
-    //timer button
+    /* timer button */
     lv_obj_t *btn_timer = lv_button_create(screen);
     lv_obj_add_style(btn_timer, &style_btn, 0);
     lv_obj_add_style(btn_timer, &style_btn_pressed, LV_STATE_PRESSED);
@@ -41,5 +46,32 @@ void ui_load_screen_clock(lv_obj_t *screen){
     
     lv_obj_add_event_cb(btn_timer, ui_event_clock, LV_EVENT_CLICKED, NULL);
 
+    /* timer label */
+    label_timer = lv_label_create(screen);
+    lv_label_set_text(label_timer, "00:00"); // initial value
+    lv_obj_align_to(label_timer, btn_timer, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
+    lv_obj_add_style(label_timer, &style_par, 0);
+
+    /* alarm button */
+    lv_obj_t *btn_alarm = lv_button_create(screen);
+    lv_obj_add_style(btn_alarm, &style_btn, 0);
+    lv_obj_add_style(btn_alarm, &style_btn_pressed, LV_STATE_PRESSED);
+    lv_obj_add_style(btn_alarm, &style_btn, LV_STATE_FOCUSED);
+    lv_obj_add_style(btn_alarm, &style_btn, LV_STATE_DISABLED);
+
+    lv_obj_align(btn_alarm, LV_ALIGN_BOTTOM_RIGHT, -110, -10);
+    lv_obj_set_size(btn_alarm, 28, 28);
+
+    lv_obj_t *img_alarm = lv_img_create(btn_alarm);
+    lv_img_set_src(img_alarm, &alarm1);
+    lv_obj_center(img_alarm);
+
+    lv_obj_add_event_cb(btn_alarm, ui_event_clock, LV_EVENT_CLICKED, NULL);
+
+    /* alarm label */
+    label_alarm = lv_label_create(screen);
+    lv_label_set_text(label_alarm, "00:00"); // initial value
+    lv_obj_align_to(label_alarm, btn_alarm, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
+    lv_obj_add_style(label_alarm, &style_par, 0);
 
 }
