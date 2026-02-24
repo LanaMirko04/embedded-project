@@ -5,7 +5,10 @@
 #include <esp_check.h>
 #include <esp_log.h>
 #include <esp_system.h>
+#include <math.h>
+#include <time.h>
 
 #include "styles.h"
 
 void ui_load_screen_clock(lv_obj_t *screen);
+void screen_clock_destroy(void);

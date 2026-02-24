@@ -1,3 +1,7 @@
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 #include "screen_clock.h"
 #include "images/clock_screen.c"
 #include "images/timer.c"
@@ -5,6 +9,21 @@
 
 static lv_obj_t *label_timer;
 static lv_obj_t *label_alarm;
+
+
+/* clock hands */
+static lv_obj_t *min_hand = NULL;
+static lv_obj_t *hour_hand = NULL;
+
+static lv_point_t min_points[2];
+static lv_point_t hour_points[2];
+
+static lv_timer_t *clock_timer = NULL;
+
+static int clock_cx;
+static int clock_cy;
+
+static void clock_update(uint8_t h, uint8_t m);
 
 void ui_event_clock(lv_event_t *e){
     static uint8_t counter = 0;
@@ -16,8 +35,100 @@ void ui_event_clock(lv_event_t *e){
 }
 
 
-void ui_load_screen_clock(lv_obj_t *screen){
+void screen_clock_destroy(void){
+    if(clock_timer) {
+        lv_timer_del(clock_timer);
+        clock_timer = NULL;
+    }
+}
+
+
+static void update_hand(lv_point_t *points, int cx, int cy, int length, int half_width, float angle_deg){
     
+    float angle = (angle_deg - 90.0f) * M_PI / 180.0f;
+
+    int tip_x = 0;
+    int tip_y = -length;
+
+    int left_x = -half_width;
+    int left_y = 0;
+
+    int right_x = half_width;
+    int right_y = 0;
+
+    /* update tip */
+    points[1].x = cx + tip_x * cosf(angle) - tip_y * sinf(angle);
+    points[1].y = cy + tip_x * sinf(angle) + tip_y * cosf(angle);
+
+    /* update left point */
+    points[0].x = cx + left_x * cosf(angle) - left_y * sinf(angle);
+    points[0].y = cy + left_x * sinf(angle) + left_y * cosf(angle);
+
+    /* update right point */
+    points[2].x = cx + right_x * cosf(angle) - right_y * sinf(angle);
+    points[2].y = cy + right_x * sinf(angle) + right_y * cosf(angle);
+
+}
+
+static void clock_update(uint8_t h, uint8_t m){
+    
+    float min_angle  = ((m * 6.0f) - 90.0f) * M_PI / 180.0f;
+    float hour_angle = (((h % 12) * 30.0f + m * 0.5f) - 90.0f) * M_PI / 180.0f;
+
+    // Start point (center)
+    hour_points[0].x = clock_cx;
+    hour_points[0].y = clock_cy;
+
+    min_points[0].x = clock_cx;
+    min_points[0].y = clock_cy;
+
+    // End point calculations
+    hour_points[1].x = clock_cx + 50 * cosf(hour_angle);
+    hour_points[1].y = clock_cy + 50 * sinf(hour_angle);
+
+    min_points[1].x = clock_cx + 80 * cosf(min_angle);
+    min_points[1].y = clock_cy + 80 * sinf(min_angle);
+
+    lv_line_set_points(hour_hand, hour_points, 2);
+    lv_line_set_points(min_hand,  min_points,  2);
+}
+
+static void clock_timer_cb(lv_timer_t *t){
+    time_t now;
+    struct tm timeinfo;
+
+    time(&now);
+    localtime_r(&now, &timeinfo);
+
+    clock_update(timeinfo.tm_hour, timeinfo.tm_min);
+}
+
+
+void clock_create(lv_obj_t *parent){
+    
+    clock_cx = lv_obj_get_width(parent) / 2;
+    clock_cy = lv_obj_get_height(parent) / 2 - 15;
+
+    hour_hand = lv_line_create(parent);
+    lv_line_set_points(hour_hand, hour_points, 2);
+    lv_obj_set_style_line_width(hour_hand, 8, 0);
+    lv_obj_set_style_line_color(hour_hand, lv_color_hex(0x610B0B), 0);
+
+    min_hand = lv_line_create(parent);
+    lv_line_set_points(min_hand, min_points, 2);
+    lv_obj_set_style_line_width(min_hand, 5, 0);
+    lv_obj_set_style_line_color(min_hand, lv_color_hex(0x610B0B), 0);
+
+
+    // Initial position
+    clock_update(12, 0);
+
+    // Create timer
+    clock_timer = lv_timer_create(clock_timer_cb, 1000, NULL);
+}
+
+void ui_load_screen_clock(lv_obj_t *screen){
+
     /* background */
     lv_obj_t *bg = lv_img_create(screen);
     lv_img_set_src(bg, &clock_screen);
@@ -73,5 +184,9 @@ void ui_load_screen_clock(lv_obj_t *screen){
     lv_label_set_text(label_alarm, "00:00"); // initial value
     lv_obj_align_to(label_alarm, btn_alarm, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
     lv_obj_add_style(label_alarm, &style_par, 0);
+
+    /* to manage clock hands */
+    clock_create(screen);
+   
 
 }

@@ -25,6 +25,9 @@ void screen_manager_init(lv_obj_t *screen){
 
 
 void ui_load_screen(lv_obj_t *screen, uint8_t num){
+
+    screen_clock_destroy();
+
     lv_obj_clean(screen);
 
     switch (num){
