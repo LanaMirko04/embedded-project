@@ -45,13 +45,12 @@ def create_app(test_config=None):
     from . import authUser
     from . import busUser
     from . import authSdrumo
-    from . import sdrumoManagement
+    from . import sdrumoConfig
     app.register_blueprint(authUser.bp, url_prefix='/userAuth')
     app.register_blueprint(status.bp, url_prefix='/api/status')
     app.register_blueprint(busUser.bp, url_prefix='/api/user/bus')
     app.register_blueprint(authSdrumo.bp, url_prefix='/sdrumoAuth')
-    app.register_blueprint(sdrumoManagement.bp, url_prefix='/api/sdrumoManagement')
-
+    app.register_blueprint(sdrumoConfig.bp, url_prefix='/sdrumoConfig')
 
     return app
 

@@ -3,7 +3,15 @@ from flask import Blueprint, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flaskr.db import get_db
 
-bp = Blueprint('sdrumoManagement', __name__)
+bp = Blueprint('sdrumoConfig', __name__)
+
+def updateTimestamp(token):
+    db = get_db()
+    db.execute(
+        'UPDATE sdrumos SET updated_at = CURRENT_TIMESTAMP WHERE token = ?',
+        (token,)
+    )
+    db.commit()
 
 @bp.route('/pair', methods=['POST'])
 @jwt_required()
@@ -32,13 +40,15 @@ def pair_sdrumo():
             (user_id, token)
         )
         db.commit()
+
+        updateTimestamp(token)
         return {'message': 'Sdrumo paired successfully'}, 200
         
     except sqlite3.Error as e:
         return {'error': f'Database error: {str(e)}'}, 500
     except Exception as e:
         return {'error': f'Pairing failed: {str(e)}'}, 500
-    
+
 @bp.route('/unpair', methods=['POST'])
 @jwt_required()
 def unpair_sdrumo():
@@ -66,6 +76,7 @@ def unpair_sdrumo():
             (token,)
         )
         db.commit()
+        updateTimestamp(token)
         return {'message': 'Sdrumo unpaired successfully'}, 200
         
     except sqlite3.Error as e:
@@ -101,9 +112,13 @@ def change_sdrumo_name():
             (new_name, token)
         )
         db.commit()
+        updateTimestamp(token)
         return {'message': 'Sdrumo name changed successfully'}, 200
         
     except sqlite3.Error as e:
         return {'error': f'Database error: {str(e)}'}, 500
     except Exception as e:
         return {'error': f'Changing name failed: {str(e)}'}, 500
+
+
+
