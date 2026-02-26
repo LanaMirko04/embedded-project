@@ -17,7 +17,8 @@
 #include "screen_boot.h"
 #include "screen_wifi.h"
 #include "screen_clock.h"
+#include "utiles.h"
 
 
 void screen_manager_init(lv_obj_t *screen);
-void ui_load_screen(lv_obj_t *screen, uint8_t num);
+void ui_load_screen(lv_obj_t *screen);

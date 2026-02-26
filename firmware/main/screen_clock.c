@@ -7,9 +7,11 @@
 #include "images/timer.c"
 #include "images/alarm.c"
 
+const char * TAG = "screen_clock";
+
+
 static lv_obj_t *label_timer;
 static lv_obj_t *label_alarm;
-
 
 /* clock hands */
 static lv_obj_t *min_hand = NULL;
@@ -25,26 +27,24 @@ static int clock_cy;
 
 static void clock_update(uint8_t h, uint8_t m);
 
-void ui_event_clock(lv_event_t *e){
+void ui_event_clock(lv_event_t *e) {
     static uint8_t counter = 0;
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t *btn = (lv_obj_t *)lv_event_get_user_data(e);
-    if (event_code == LV_EVENT_CLICKED){
-        counter ++;
+    if (event_code == LV_EVENT_CLICKED) {
+        counter++;
     }
 }
 
-
-void screen_clock_destroy(void){
-    if(clock_timer) {
+void screen_clock_destroy(void) {
+    if (clock_timer) {
         lv_timer_del(clock_timer);
         clock_timer = NULL;
     }
 }
 
+static void update_hand(lv_point_t *points, int cx, int cy, int length, int half_width, float angle_deg) {
 
-static void update_hand(lv_point_t *points, int cx, int cy, int length, int half_width, float angle_deg){
-    
     float angle = (angle_deg - 90.0f) * M_PI / 180.0f;
 
     int tip_x = 0;
@@ -67,12 +67,11 @@ static void update_hand(lv_point_t *points, int cx, int cy, int length, int half
     /* update right point */
     points[2].x = cx + right_x * cosf(angle) - right_y * sinf(angle);
     points[2].y = cy + right_x * sinf(angle) + right_y * cosf(angle);
-
 }
 
-static void clock_update(uint8_t h, uint8_t m){
-    
-    float min_angle  = ((m * 6.0f) - 90.0f) * M_PI / 180.0f;
+static void clock_update(uint8_t h, uint8_t m) {
+
+    float min_angle = ((m * 6.0f) - 90.0f) * M_PI / 180.0f;
     float hour_angle = (((h % 12) * 30.0f + m * 0.5f) - 90.0f) * M_PI / 180.0f;
 
     // Start point (center)
@@ -90,22 +89,31 @@ static void clock_update(uint8_t h, uint8_t m){
     min_points[1].y = clock_cy + 80 * sinf(min_angle);
 
     lv_line_set_points(hour_hand, hour_points, 2);
-    lv_line_set_points(min_hand,  min_points,  2);
+    lv_line_set_points(min_hand, min_points, 2);
 }
 
-static void clock_timer_cb(lv_timer_t *t){
+static void clock_timer_cb(lv_timer_t *t) {
     time_t now;
     struct tm timeinfo;
 
     time(&now);
     localtime_r(&now, &timeinfo);
 
-    clock_update(timeinfo.tm_hour, timeinfo.tm_min);
+    static int hour = -1;
+    static int minute = -1;
+
+    if (hour != timeinfo.tm_hour || minute != timeinfo.tm_min) {
+        clock_update(timeinfo.tm_hour, timeinfo.tm_min);
+    }
+
+    ESP_LOGI(TAG, "%02d:%02d", hour, minute);
+
+    hour = timeinfo.tm_hour;
+    minute = timeinfo.tm_min;
 }
 
+void clock_create(lv_obj_t *parent) {
 
-void clock_create(lv_obj_t *parent){
-    
     clock_cx = lv_obj_get_width(parent) / 2;
     clock_cy = lv_obj_get_height(parent) / 2 - 15;
 
@@ -119,15 +127,15 @@ void clock_create(lv_obj_t *parent){
     lv_obj_set_style_line_width(min_hand, 5, 0);
     lv_obj_set_style_line_color(min_hand, lv_color_hex(0x610B0B), 0);
 
-
     // Initial position
-    clock_update(12, 0);
+    //clock_update(12, 0);
+    clock_timer_cb(NULL);
 
     // Create timer
     clock_timer = lv_timer_create(clock_timer_cb, 1000, NULL);
 }
 
-void ui_load_screen_clock(lv_obj_t *screen){
+void ui_load_screen_clock(lv_obj_t *screen) {
 
     /* background */
     lv_obj_t *bg = lv_img_create(screen);
@@ -148,13 +156,12 @@ void ui_load_screen_clock(lv_obj_t *screen){
 
     lv_obj_align(btn_timer, LV_ALIGN_BOTTOM_LEFT, 65, -10);
     lv_obj_set_size(btn_timer, 28, 28);
-    
-    
+
     lv_obj_t *img_timer = lv_img_create(btn_timer);
     lv_img_set_src(img_timer, &timer);
     lv_obj_center(img_timer);
     //lv_obj_clear_flag(img_timer, LV_OBJ_FLAG_CLICKABLE);
-    
+
     lv_obj_add_event_cb(btn_timer, ui_event_clock, LV_EVENT_CLICKED, NULL);
 
     /* timer label */
@@ -187,6 +194,4 @@ void ui_load_screen_clock(lv_obj_t *screen){
 
     /* to manage clock hands */
     clock_create(screen);
-   
-
 }

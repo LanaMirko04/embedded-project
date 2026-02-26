@@ -9,6 +9,7 @@
 #include <time.h>
 
 #include "styles.h"
+#include "utiles.h"
 
 void ui_load_screen_clock(lv_obj_t *screen);
 void screen_clock_destroy(void);

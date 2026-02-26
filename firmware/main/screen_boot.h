@@ -7,5 +7,6 @@
 #include <esp_system.h>
 
 #include "styles.h"
+#include "utiles.h"
 
 void ui_load_screen_boot(lv_obj_t *screen);
