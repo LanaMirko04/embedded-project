@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS sdrumos;
 DROP TABLE IF EXISTS busses;
-DROP TABLE IF EXISTS userBusses;
+DROP TABLE IF EXISTS sdrumo_busses;
 DROP TABLE IF EXISTS refresh_tokens;
 
 CREATE TABLE users (
@@ -18,6 +18,10 @@ CREATE TABLE sdrumos (
   user_id INTEGER DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  location TEXT,
+  location_latitude REAL,
+  location_longitude REAL,
+  stop_id INTEGER,
 
   FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
@@ -29,13 +33,13 @@ CREATE TABLE busses (
   color TEXT
 );
 
-CREATE TABLE userBusses (
+CREATE TABLE sdrumo_busses (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id INTEGER NOT NULL,
+  sdrumo_id INTEGER NOT NULL,
   bus_id INTEGER NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
-  FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+  FOREIGN KEY (sdrumo_id) REFERENCES sdrumos (id) ON DELETE CASCADE,
   FOREIGN KEY (bus_id) REFERENCES busses (id) ON DELETE CASCADE
 );
 

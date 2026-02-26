@@ -44,13 +44,23 @@ def create_app(test_config=None):
     from . import status
     from . import authUser
     from . import busUser
+    from . import weatherUser
+
     from . import authSdrumo
     from . import sdrumoConfig
+    from . import busSdrumo
+    from . import weatherSdrumo
+
+
     app.register_blueprint(authUser.bp, url_prefix='/userAuth')
     app.register_blueprint(status.bp, url_prefix='/api/status')
     app.register_blueprint(busUser.bp, url_prefix='/api/user/bus')
+    app.register_blueprint(weatherUser.bp, url_prefix='/api/user/weather')
+
     app.register_blueprint(authSdrumo.bp, url_prefix='/sdrumoAuth')
     app.register_blueprint(sdrumoConfig.bp, url_prefix='/sdrumoConfig')
+    app.register_blueprint(busSdrumo.bp, url_prefix='/api/sdrumo/bus')
+    app.register_blueprint(weatherSdrumo.bp, url_prefix='/api/sdrumo/weather')
 
     return app
 

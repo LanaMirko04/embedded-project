@@ -31,7 +31,7 @@ def get_stops():
             busList = []
             for bus in stop['routes']:
                 busList.append(bus['routeShortName'])
-            response.append({'id': stop['stopId'], 'name': stop['stopName'], 'position': {'lat': stop['stopLat'], 'lon': stop['stopLon']}, 'buses': busList})
+            response.append({'id': stop['stopId'], 'name': stop['stopName'], 'position': {'lat': stop['stopLat'], 'lon': stop['stopLon']}, 'busses': busList})
         return response, 200
     else:
         return {'error': 'Failed to fetch stops'}, tt_response.status_code
@@ -46,7 +46,7 @@ def get_stop(stop_id):
                 busList = []
                 for bus in stop['routes']:
                     busList.append(bus['routeShortName'])
-                response = {'id': stop['stopId'], 'name': stop['stopName'], 'position': {'lat': stop['stopLat'], 'lon': stop['stopLon']}, 'buses': busList}
+                response = {'id': stop['stopId'], 'name': stop['stopName'], 'position': {'lat': stop['stopLat'], 'lon': stop['stopLon']}, 'busses': busList}
                 return response, 200
         return {'error': 'Stop not found'}, 404
     else:
@@ -65,6 +65,25 @@ def get_routes():
             'bus_name': route['bus_name'],
             'color': route['color']
         })
+    return response, 200
+
+@bp.route('/getRouteByNumber/<string:bus_number>', methods=['GET'])
+def get_route_by_number(bus_number):
+    db = get_db()
+    route = db.execute(
+        'SELECT id, bus_number, bus_name, color FROM busses WHERE bus_number = ?',
+        (bus_number,)
+    ).fetchone()
+
+    if route is None:
+        return {'error': 'Route not found'}, 404
+
+    response = {
+        'id': route['id'],
+        'bus_number': route['bus_number'],
+        'bus_name': route['bus_name'],
+        'color': route['color']
+    }
     return response, 200
 
 @bp.route('/getRoute/<int:route_id>', methods=['GET'])
@@ -112,3 +131,13 @@ def get_trips(stopId):
         return response, 200
     else:
         return {'error': 'Failed to fetch trips'}, tt_response.status_code
+
+@bp.route('/getTrips/<int:stopId>/<int:routeId>', methods=['GET'])
+def get_trips_by_route(stopId, routeId):
+    response = get_trips(stopId)
+    if response[1] == 200:
+        trips = response[0]
+        filtered_trips = [trip for trip in trips if trip['busId'] == routeId]
+        return filtered_trips, 200
+    else:
+        return {'error': 'Failed to fetch trips'}, response[1]
