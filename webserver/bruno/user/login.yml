@@ -1,0 +1,22 @@
+info:
+  name: login
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: 127.0.0.1:5000/api/user/auth/login
+  body:
+    type: json
+    data: |-
+      {
+        "username" : "celli",
+        "password" : "celli"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

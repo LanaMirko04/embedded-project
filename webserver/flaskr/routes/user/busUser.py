@@ -7,6 +7,8 @@ import json
 from dotenv import load_dotenv
 import os
 
+load_dotenv()
+
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
@@ -106,38 +108,38 @@ def get_route(route_id):
     return response, 200
     
 # Bus Trips Endpoint
-@bp.route('/getTrips/<int:stopId>', methods=['GET'])
-def get_trips(stopId):
-
-    params = {
-        'stopId': stopId,
-        'type': 'U',
-        'limit': 10,
-        'refDateTime': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
-    }
-
-    print(params)
-
-    tt_response = requests.get(tt_base_url + 'trips_new', auth=tt_basic_auth, params=params)
-
-    if tt_response.status_code == 200:
-        response = []
-        for trip in tt_response.json():
-            response.append({
-                'busId': trip['routeId'],
-                'delay': trip['delay'],
-                'arrivalTime': trip['oraArrivoEffettivaAFermataSelezionata']
-            })
-        return response, 200
-    else:
-        return {'error': 'Failed to fetch trips'}, tt_response.status_code
-
-@bp.route('/getTrips/<int:stopId>/<int:routeId>', methods=['GET'])
-def get_trips_by_route(stopId, routeId):
-    response = get_trips(stopId)
-    if response[1] == 200:
-        trips = response[0]
-        filtered_trips = [trip for trip in trips if trip['busId'] == routeId]
-        return filtered_trips, 200
-    else:
-        return {'error': 'Failed to fetch trips'}, response[1]
+#@bp.route('/getTrips/<int:stopId>', methods=['GET'])
+#def get_trips(stopId):
+#
+#    params = {
+#        'stopId': stopId,
+#        'type': 'U',
+#        'limit': 10,
+#        'refDateTime': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+#    }
+#
+#    print(params)
+#
+#    tt_response = requests.get(tt_base_url + 'trips_new', auth=tt_basic_auth, params=params)
+#
+#    if tt_response.status_code == 200:
+#        response = []
+#        for trip in tt_response.json():
+#            response.append({
+#                'busId': trip['routeId'],
+#                'delay': trip['delay'],
+#                'arrivalTime': trip['oraArrivoEffettivaAFermataSelezionata']
+#            })
+#        return response, 200
+#    else:
+#        return {'error': 'Failed to fetch trips'}, tt_response.status_code
+#
+#@bp.route('/getTrips/<int:stopId>/<int:routeId>', methods=['GET'])
+#def get_trips_by_route(stopId, routeId):
+#    response = get_trips(stopId)
+#    if response[1] == 200:
+#        trips = response[0]
+#        filtered_trips = [trip for trip in trips if trip['busId'] == routeId]
+#        return filtered_trips, 200
+#    else:
+#        return {'error': 'Failed to fetch trips'}, response[1]

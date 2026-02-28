@@ -1,0 +1,22 @@
+info:
+  name: setStop
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: 127.0.0.1:5000/api/config/setStop
+  body:
+    type: json
+    data: |-
+      {
+        "token" : "orange-south-1889",
+        "stop_id" : "247"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

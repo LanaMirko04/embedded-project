@@ -7,6 +7,8 @@ import json
 from dotenv import load_dotenv
 import os
 
+load_dotenv()
+
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
@@ -44,17 +46,7 @@ def get_trips(stopId):
     else:
         return {'error': 'Failed to fetch trips'}, tt_response.status_code
 
-@bp.route('/getTrips/<int:stopId>/<int:routeId>', methods=['GET'])
-def get_trips_by_route(stopId, routeId):
-    response = get_trips(stopId)
-    if response[1] == 200:
-        trips = response[0]
-        filtered_trips = [trip for trip in trips if trip['busId'] == routeId]
-        return filtered_trips, 200
-    else:
-        return {'error': 'Failed to fetch trips'}, response[1]
-
-@bp.route('/getSdrumoTrips/<string:sdrumo_token>', methods=['GET'])
+@bp.route('/getTrips/<string:sdrumo_token>', methods=['GET'])
 def get_sdrumo_trips(sdrumo_token):
     sdrumo_id = get_db().execute(
         'SELECT id FROM sdrumos WHERE token = ?',
@@ -77,8 +69,12 @@ def get_sdrumo_trips(sdrumo_token):
         (sdrumo_token,)
     ).fetchone()['stop_id']
 
-    for bus in bus_ids:
-        response = get_trips_by_route(stop_id, bus['bus_id'])
-        if response[1] == 200:
-            return response
+    trips = get_trips(stop_id)
+    filtered_trips = []
+    for trip in trips[0]:  # trips is a tuple (response, status_code
+        if any(trip['busId'] == bus_id['bus_id'] for bus_id in bus_ids):
+            filtered_trips.append(trip)
+    if filtered_trips:
+        return filtered_trips, 200
+        
     return {'error': 'No trips found for this Sdrumo'}, 404
