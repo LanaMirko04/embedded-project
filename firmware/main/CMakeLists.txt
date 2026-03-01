@@ -12,9 +12,13 @@ idf_component_register(SRCS main.c lcd.c touch.c
                             screen_boot.c
                             screen_wifi.c
                             screen_clock.c
+                            screen_bus.c
+                            ui_navigation.c
                             images/clock_screen.c 
                             images/timer.c
                             images/wifi_icon.c
+                            images/arrow_left.c
+                            images/arrow_right.c
                             utiles.c
                     INCLUDE_DIRS "."
                     REQUIRES esp_lcd driver esp_timer

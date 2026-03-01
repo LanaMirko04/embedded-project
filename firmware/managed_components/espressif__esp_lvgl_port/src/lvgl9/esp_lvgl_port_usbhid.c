@@ -193,7 +193,7 @@ static lvgl_port_usb_hid_ctx_t *lvgl_port_hid_init(void)
     }
 
     lvgl_hid_ctx.queue = xQueueCreate(10, sizeof(lvgl_port_usb_hid_event_t));
-    xTaskCreate(&lvgl_port_usb_hid_task, "hid_task", 4 * 1024, &lvgl_hid_ctx, 2, &lvgl_hid_ctx.task);
+    xTaskCreate(&lvgl_port_usb_hid_task, "hid_task", 8 * 1024, &lvgl_hid_ctx, 2, &lvgl_hid_ctx.task);
 
     return &lvgl_hid_ctx;
 }

@@ -1,3 +1,4 @@
 #include "utiles.h"
 
-Screens screen_type;
+Screens present_screen_type;
+Screens next_screen_type;

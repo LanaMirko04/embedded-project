@@ -17,6 +17,8 @@
 #include "screen_boot.h"
 #include "screen_wifi.h"
 #include "screen_clock.h"
+#include "screen_bus.h"
+#include "ui_navigation.h"
 #include "utiles.h"
 
 

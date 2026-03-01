@@ -85,6 +85,7 @@ void app_main(void) {
         esp_restart();
     }
 
+
     ESP_ERROR_CHECK(touch_init(&tp));
     touch_cfg.disp = lvgl_display;
     touch_cfg.handle = tp;

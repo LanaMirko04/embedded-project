@@ -29,13 +29,15 @@ static void clock_update(uint8_t h, uint8_t m);
 
 void ui_event_clock(lv_event_t *e) {
     static uint8_t counter = 0;
-    lv_event_code_t event_code = lv_event_get_code(e);
-    lv_obj_t *btn = (lv_obj_t *)lv_event_get_user_data(e);
-    if (event_code == LV_EVENT_CLICKED) {
+    //lv_event_code_t event_code = lv_event_get_code(e);
+    //lv_obj_t *btn = (lv_obj_t *)lv_event_get_user_data(e);
+    //if (event_code == LV_EVENT_CLICKED) {
         counter++;
-    }
+    //}
 }
 
+
+/* destroy timer */
 void screen_clock_destroy(void) {
     if (clock_timer) {
         lv_timer_del(clock_timer);
@@ -43,32 +45,9 @@ void screen_clock_destroy(void) {
     }
 }
 
-static void update_hand(lv_point_t *points, int cx, int cy, int length, int half_width, float angle_deg) {
 
-    float angle = (angle_deg - 90.0f) * M_PI / 180.0f;
 
-    int tip_x = 0;
-    int tip_y = -length;
-
-    int left_x = -half_width;
-    int left_y = 0;
-
-    int right_x = half_width;
-    int right_y = 0;
-
-    /* update tip */
-    points[1].x = cx + tip_x * cosf(angle) - tip_y * sinf(angle);
-    points[1].y = cy + tip_x * sinf(angle) + tip_y * cosf(angle);
-
-    /* update left point */
-    points[0].x = cx + left_x * cosf(angle) - left_y * sinf(angle);
-    points[0].y = cy + left_x * sinf(angle) + left_y * cosf(angle);
-
-    /* update right point */
-    points[2].x = cx + right_x * cosf(angle) - right_y * sinf(angle);
-    points[2].y = cy + right_x * sinf(angle) + right_y * cosf(angle);
-}
-
+/* update position of clock hands */
 static void clock_update(uint8_t h, uint8_t m) {
 
     float min_angle = ((m * 6.0f) - 90.0f) * M_PI / 180.0f;
@@ -92,6 +71,8 @@ static void clock_update(uint8_t h, uint8_t m) {
     lv_line_set_points(min_hand, min_points, 2);
 }
 
+
+/* create right clock */
 static void clock_timer_cb(lv_timer_t *t) {
     time_t now;
     struct tm timeinfo;
@@ -112,6 +93,9 @@ static void clock_timer_cb(lv_timer_t *t) {
     minute = timeinfo.tm_min;
 }
 
+
+
+/* create clock hands */
 void clock_create(lv_obj_t *parent) {
 
     clock_cx = lv_obj_get_width(parent) / 2;
@@ -135,6 +119,9 @@ void clock_create(lv_obj_t *parent) {
     clock_timer = lv_timer_create(clock_timer_cb, 1000, NULL);
 }
 
+
+
+/* draw clock screen */
 void ui_load_screen_clock(lv_obj_t *screen) {
 
     /* background */

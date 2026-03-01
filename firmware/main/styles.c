@@ -8,6 +8,7 @@ lv_style_t style_btn_pressed;
 
 
 
+
 void styles_init() {
 
     /* style of title */
@@ -41,5 +42,8 @@ void styles_init() {
     lv_style_init(&style_btn_pressed);
     lv_style_set_bg_color(&style_btn_pressed, lv_color_black());
     lv_style_set_bg_opa(&style_btn_pressed, LV_OPA_30);
+
+   
+
     
 }
