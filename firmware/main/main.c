@@ -32,7 +32,7 @@
 #include "screen_manager.h"
 
 // Generated UI header (from XML)
-//#include "ui_1.h"
+
 
 static const char *TAG = "demo";
 
@@ -50,23 +50,12 @@ static esp_err_t app_lvgl_main(void) {
     return ESP_OK;
 }
 
-//static void lv_tick_task(void *arg) {
-//    (void)arg;
-//    while (1) {
-//        lv_tick_inc(1);
-//        vTaskDelay(pdMS_TO_TICKS(1));
-//    }
-//}
-//
-//static void lvgl_task(void *arg) {
-//    (void)arg;
-//    while (1) {
-//        lv_timer_handler();
-//        vTaskDelay(pdMS_TO_TICKS(5));
-//    }
-//}
 
 void app_main(void) {
+
+extern Screens present_screen_type;
+extern Screens next_screen_type;
+
 
     esp_lcd_panel_io_handle_t lcd_io;
     esp_lcd_panel_handle_t lcd_panel;
