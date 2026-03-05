@@ -35,7 +35,8 @@ void ui_load_screen(lv_obj_t *screen) {
 
     switch (present_screen_type) {
         case SCREEN_BOOT:
-            ui_load_screen_boot(screen);
+            ui_load_screen_bus(screen);
+            //ui_load_screen_boot(screen);
             ui_load_arrows_btn(screen);
             break;
         case SCREEN_WIFI:
