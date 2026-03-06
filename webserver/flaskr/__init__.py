@@ -45,6 +45,7 @@ def create_app(test_config=None):
 
     from .routes.user import authUser
     from .routes.user import busUser
+    from .routes.user import infoUser
     from .routes.user import weatherUser
 
     from .routes.sdrumo import authSdrumo
@@ -56,6 +57,7 @@ def create_app(test_config=None):
 
     app.register_blueprint(authUser.bp, url_prefix='/api/user/auth')
     app.register_blueprint(busUser.bp, url_prefix='/api/user/bus')
+    app.register_blueprint(infoUser.bp, url_prefix='/api/user/info')
     app.register_blueprint(weatherUser.bp, url_prefix='/api/user/weather')
 
     app.register_blueprint(authSdrumo.bp, url_prefix='/api/sdrumo/auth')
