@@ -27,7 +27,7 @@ CREATE TABLE sdrumos (
 );
 
 CREATE TABLE busses (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id INTEGER PRIMARY KEY,
   bus_number TEXT NOT NULL,
   bus_name TEXT NOT NULL,
   color TEXT

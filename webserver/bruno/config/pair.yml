@@ -10,7 +10,7 @@ http:
     type: json
     data: |-
       {
-        "token" : "orange-south-1889"
+        "token" : "navy-senior-5934"
       }
   auth: inherit
 

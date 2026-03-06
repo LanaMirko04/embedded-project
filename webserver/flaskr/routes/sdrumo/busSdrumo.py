@@ -19,6 +19,32 @@ bp = Blueprint('busSdrumo', __name__)
 tt_base_url = os.getenv('TT_BASE_URL', 'https://app-tpl.tndigit.it/gtlservice/')
 tt_basic_auth = HTTPBasicAuth(os.getenv('TT_BASIC_AUTH_USER'), os.getenv('TT_BASIC_AUTH_PASS'))
 
+def get_number_from_id(bus_id):
+    number = get_db().execute(
+        "SELECT bus_number FROM busses WHERE id = ?",
+        (bus_id,)    ).fetchone()
+    return number['bus_number'] if number else None
+
+def get_name_from_id(bus_id):
+    name = get_db().execute(
+        "SELECT bus_name FROM busses WHERE id = ?",
+        (bus_id,)    ).fetchone()
+    return name['bus_name'] if name else None
+
+def get_color_from_id(bus_id):
+    color = get_db().execute(
+        "SELECT color FROM busses WHERE id = ?",
+        (bus_id,)    ).fetchone()
+    return hex_to_rgb(color['color']) if color else None
+
+def hex_to_rgb(hex_color: str):
+    hex_color = hex_color.strip().lstrip("#")
+    if len(hex_color) == 3:  # short form like "f0a"
+        hex_color = "".join(c * 2 for c in hex_color)
+    if len(hex_color) != 6:
+        raise ValueError("Hex color must be 3 or 6 characters long")
+    return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+
 # Bus Trips Endpoint
 @bp.route('/getTrips/<int:stopId>', methods=['GET'])
 def get_trips(stopId):
@@ -39,6 +65,9 @@ def get_trips(stopId):
         for trip in tt_response.json():
             response.append({
                 'busId': trip['routeId'],
+                'busNumber': get_number_from_id(trip['routeId']),
+                'busName': get_name_from_id(trip['routeId']),
+                'busColor': get_color_from_id(trip['routeId']),
                 'delay': trip['delay'],
                 'arrivalTime': trip['oraArrivoEffettivaAFermataSelezionata']
             })
