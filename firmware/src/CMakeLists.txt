@@ -1,8 +1,8 @@
 #This file was automatically generated for projects
 #without default 'CMakeLists.txt' file.
 
-FILE(GLOB_RECURSE app_sources ${CMAKE_SOURCE_DIR}/src/*.*)
+FILE(GLOB_RECURSE app_sources "*.cpp" "*.c")
 
 idf_component_register(SRCS ${app_sources}
-                       PRIV_REQUIRES esp_wifi wpa_supplicant nvs_flash
-                       INCLUDE_DIRS "../include")
+                       INCLUDE_DIRS "../include"
+                       PRIV_REQUIRES src esp_wifi wpa_supplicant nvs_flash spi_flash)

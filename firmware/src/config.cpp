@@ -125,9 +125,6 @@ Result Config::load(void) {
             return Result::UNKNOWN_ERROR;
     }
 
-    /*! TODO: give me config parameters porcaccia la madonna plz */
-    ESP_LOGW(CONFIG_TAG, "%s not implemented yet... ( T^T)", __FUNCTION__);
-
     nvs_close(nvs);
     return Result::SUCCESS;
 }
@@ -191,25 +188,6 @@ Config::Config(void) {
     memset(this->password, 0, Config::PASSWORD_SIZE);
     this->version = 0;
 
-    switch (this->load()) {
-        case Result::SUCCESS:
-            if (this->is_up_to_date()) {
-                break;
-            }
-
-        case Result::NOT_FOUND:
-            this->fetch();
-            break;
-
-        case Result::IO_ERROR:
-        case Result::UNKNOWN_ERROR:
-            ESP_LOGE(CONFIG_TAG, "%s", result_get_err_msg());
-            abort();
-            break;
-
-        default:
-            break;
-    }
 }
 
 Config::~Config(void) {

@@ -14,7 +14,6 @@
 #include "result.h"
 
 #include <array>
-#include <functional>
 #include <string_view>
 
 /*!
@@ -26,7 +25,7 @@ class Fsm {
     /*!
      * \brief          Type alias for a state action.
      */
-    using StateAction = std::function<Result(void)>;
+    using StateAction = Result (*)(void);
 
     /*!
      * \brief           An enumeration with all the possible FSM states.
@@ -36,10 +35,8 @@ class Fsm {
         INIT,            /*!< Board initialization */
         WIFI_CONNECTION, /*!< Connecting to WiFi network */
         FETCH_CONFIG,    /*!< Fetching configuration */
-        PROCESS_CONFIG,  /*!< Processing configuration */
         UPDATE_VIEW,     /*!< Updating the current view and relative model */
-        ERROR,           /*!< Error state (can be recovered) */
-        FATAL,           /*!< Fatal error state (cannot be recovered) */
+        ERROR,           /*!< Error state */
         COUNT            /*!< Number of states (internal use only, specifically for arrays) */
     };
 

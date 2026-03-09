@@ -39,7 +39,7 @@ const char *result_get_err_msg(void) {
     return return_err_msg.data();
 }
 
-constexpr std::string_view result_to_str(Result result) {
+const char *result_to_str(Result result) {
     switch (result) {
         case Result::SUCCESS:
             return "SUCCESS";

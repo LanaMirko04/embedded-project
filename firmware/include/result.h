@@ -75,8 +75,8 @@ const char *result_get_err_msg(void);
  * \brief           Convert a Result enum value to a string.
  *
  * \param[in]       result The Result enum value.
- * \retval          std::string The string representation of the Result enum value.
+ * \retval          char* The pointer to the Result enum string.
  */
-constexpr std::string_view result_to_str(Result result);
+const char *result_to_str(Result result);
 
 #endif /*! RESULT_H */

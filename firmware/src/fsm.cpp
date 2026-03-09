@@ -5,14 +5,12 @@
 #include <string_view>
 
 const bool Fsm::transition_matrix[static_cast<std::size_t>(State::COUNT)][static_cast<std::size_t>(State::COUNT)] = {
-    { false, true, false, false, false, false, false, false },
-    { false, false, true, false, false, false, true, false },
-    { false, false, false, true, false, false, true, false },
-    { false, false, false, false, true, false, true, false },
-    { false, false, false, true, false, true, true, false },
-    { false, false, false, true, false, true, true, false },
-    { false, false, true, true, false, true, true, true },
-    { false, false, false, true, false, false, false, true },
+    { false, true, false, false, false, false },
+    { false, false, true, false, false, true },
+    { false, false, false, true, true, true },
+    { false, false, false, false, true, true },
+    { false, false, false, true, true, true },
+    { false, false, true, true, true, true },
 };
 
 Fsm &Fsm::get_instance() {
@@ -34,17 +32,11 @@ constexpr std::string_view Fsm::state_to_str(Fsm::State state) {
         case Fsm::State::FETCH_CONFIG:
             return "FETCH_CONFIG";
 
-        case Fsm::State::PROCESS_CONFIG:
-            return "PROCESS_CONFIG";
-
         case Fsm::State::UPDATE_VIEW:
             return "UPDATE_VIEW";
 
         case Fsm::State::ERROR:
             return "ERROR";
-
-        case Fsm::State::FATAL:
-            return "FATAL";
 
         case Fsm::State::COUNT: /*! This state does not exist (used for counting) */
         default:                /*! To avoid warnings and undefined behavior (should never happen) */
