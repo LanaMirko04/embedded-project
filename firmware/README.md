@@ -1,18 +1,29 @@
-# How to use PlatformIO with ESP-IDF framework
+# How to use ESP-IDF
 
-```shell
+## Installation
+
+To compile the firware, you need to install **ESP-IDF** following the [official guide](https://docs.espressif.com/projects/esp-idf/en/stable/esp32/get-started/index.html#installation).
+
+> [!TIP]
+> If you're using **Arch Linux**, you can simply install it from the [AUR](https://aur.archlinux.org/packages/esp-idf).
+
+## Commands
+
+here are the essential commands to manage the project.
+
+```bash
 # Build project
-$ pio run
+$ idf.py build
 
 # Upload firmware
-$ pio run --target upload
-
-# Build specific environment
-$ pio run -e esp32-2432S028Rv2
-
-# Upload firmware for the specific environment
-$ pio run -e esp32-2432S028Rv2 --target upload
+$ idf.py flash
 
 # Clean build files
-$ pio run --target clean
+$ idf.py clean
+
+# Clean build files + managed components
+$ idf.py fullclean
+
+# Read serial messages
+$ idf.py monitor
 ```
