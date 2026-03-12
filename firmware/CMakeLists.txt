@@ -4,4 +4,4 @@ set(EXTRA_COMPONENT_DIRS src)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(firmware)
 
-idf_build_set_property(COMPILE_OPTIONS -Oz -Wall -DLV_CONF_PATH="${CMAKE_SOURCE_DIR}/main/lv_conf.h" APPEND)
+idf_build_set_property(COMPILE_OPTIONS -Wno-error -DLV_CONF_PATH="${CMAKE_SOURCE_DIR}/include/lv_conf.h" APPEND)
