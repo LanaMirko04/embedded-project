@@ -1,0 +1,11 @@
+<project name="ui">
+	<folders>
+		<folder path="firmware/ui" />
+	</folders>
+
+	<targets>
+		<target name="t1">
+			<display width="320" height="240" />
+		</target>
+	</targets>
+</project>
