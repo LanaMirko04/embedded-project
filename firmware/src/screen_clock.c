@@ -16,8 +16,8 @@ static lv_obj_t *label_alarm;
 static lv_obj_t *min_hand = NULL;
 static lv_obj_t *hour_hand = NULL;
 
-static lv_point_t min_points[2];
-static lv_point_t hour_points[2];
+static lv_point_precise_t min_points[2];
+static lv_point_precise_t hour_points[2];
 
 static lv_timer_t *clock_timer = NULL;
 

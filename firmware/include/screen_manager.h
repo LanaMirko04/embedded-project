@@ -21,6 +21,5 @@
 #include "ui_navigation.h"
 #include "utiles.h"
 
-
 void screen_manager_init(lv_obj_t *screen);
 void ui_load_screen(lv_obj_t *screen);
