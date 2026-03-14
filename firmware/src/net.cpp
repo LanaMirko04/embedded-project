@@ -11,24 +11,18 @@
 /*! Sdrumo Modules */
 #include "net.h"
 #include "config.h"
+#include "esp_err.h"
 #include "result.h"
 /*! ESP-IDF Components */
-#include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
 #include "esp_wifi.h"
-#include "esp_eap_client.h"
 #include "esp_event.h"
 #include "esp_log.h"
-#include "esp_system.h"
-#include "nvs_flash.h"
 #include "esp_netif.h"
 #include "esp_smartconfig.h"
-#include "nvs.h"
 /*! Standard Library */
-#include <algorithm>
 #include <cassert>
-#include <atomic>
 #include <cstring>
 
 constexpr std::size_t NET_SSID_SIZE = 33U;
@@ -37,6 +31,8 @@ constexpr std::size_t NET_PASSWORD_SIZE = 65U;
 static const char *NET_TAG = "NET";
 
 void NetHandler::event_handler(void *arg, esp_event_base_t event_base, std::int32_t event_id, void *event_data) {
+    ESP_LOGD(NET_TAG, "Now executing %s", __func__);
+
     NetHandler &net = NetHandler::get_instance();
     Config &config = Config::get_instance();
 
@@ -143,6 +139,8 @@ void NetHandler::event_handler(void *arg, esp_event_base_t event_base, std::int3
 }
 
 void NetHandler::smartconfig_task(void *args) {
+    ESP_LOGD(NET_TAG, "Now executing %s", __func__);
+
     EventBits_t bits;
     NetHandler &net_handler = NetHandler::get_instance();
 
@@ -163,11 +161,15 @@ void NetHandler::smartconfig_task(void *args) {
 }
 
 NetHandler &NetHandler::get_instance(void) {
+    ESP_LOGD(NET_TAG, "Now executing %s", __func__);
+
     static NetHandler instance;
     return instance;
 }
 
 void NetHandler::init_connection(void) {
+    ESP_LOGD(NET_TAG, "Now executing %s", __func__);
+
     static bool netif_initialized = false;
     Config &config = Config::get_instance();
 
@@ -202,13 +204,15 @@ void NetHandler::init_connection(void) {
         ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &cfg));
     } else {
         ESP_LOGE(NET_TAG, "Failed to load Wi-Fi credentials: %s", result_get_err_msg());
-        abort();
+        // abort();
     }
 
     ESP_ERROR_CHECK(esp_wifi_start());
 }
 
 void NetHandler::deinit_connection(void) {
+    ESP_LOGD(NET_TAG, "Now executing %s", __func__);
+
     if (this->smartconfig_running) {
         esp_smartconfig_stop();
         this->smartconfig_running = false;
