@@ -35,9 +35,17 @@ def get_color_from_id(bus_id):
     color = get_db().execute(
         "SELECT color FROM busses WHERE id = ?",
         (bus_id,)    ).fetchone()
-    return hex_to_rgb(color['color']) if color else None
+    if color and color['color']:
+        try:
+            return hex_to_rgb(color['color'])
+        except (ValueError, TypeError):
+            # Invalid hex color, return None
+            return None
+    return None
 
 def hex_to_rgb(hex_color: str):
+    if not hex_color:
+        raise ValueError("Hex color cannot be empty")
     hex_color = hex_color.strip().lstrip("#")
     if len(hex_color) == 3:  # short form like "f0a"
         hex_color = "".join(c * 2 for c in hex_color)
@@ -69,7 +77,8 @@ def get_trips(stopId):
                 'busName': get_name_from_id(trip['routeId']),
                 'busColor': get_color_from_id(trip['routeId']),
                 'delay': trip['delay'],
-                'arrivalTime': trip['oraArrivoEffettivaAFermataSelezionata']
+                'originalArrivalTime': trip['oraArrivoProgrammataAFermataSelezionata'],
+                'updatedArrivalTime': trip['oraArrivoEffettivaAFermataSelezionata']
             })
         return response, 200
     else:
