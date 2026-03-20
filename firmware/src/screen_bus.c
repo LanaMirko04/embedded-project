@@ -11,6 +11,7 @@ typedef struct {
     char bus_name[64];
     char bus_number[8];
     float delay;
+    char eta[5]; //estimated time of arrival
 } Bus;
 
 static uint16_t last_selected_bus = 0;
@@ -45,11 +46,11 @@ void create_bus_row(Bus bus, lv_obj_t *screen, int index) {
     lv_obj_set_width(row, ROW_WIDTH);
     lv_obj_set_height(row, ROW_HEIGHT);
     lv_obj_align(row, LV_ALIGN_TOP_MID, 0, 50 + index * ROW_HEIGHT + 5);
-    lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(row,
-                          LV_FLEX_ALIGN_START,
-                          LV_FLEX_ALIGN_CENTER,
-                          LV_FLEX_ALIGN_CENTER);
+    //lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
+    //lv_obj_set_flex_align(row,
+    //                      LV_FLEX_ALIGN_START,
+    //                      LV_FLEX_ALIGN_CENTER,
+    //                      LV_FLEX_ALIGN_CENTER);
 
     lv_obj_set_style_pad_all(row, PADDING, 0);
     lv_obj_set_style_radius(row, 6, 0);
@@ -67,18 +68,29 @@ void create_bus_row(Bus bus, lv_obj_t *screen, int index) {
     lv_obj_set_style_radius(square, 6, 0);
     lv_obj_set_style_pad_all(square, 0, 0);
     lv_obj_set_style_border_width(square, 0, 0);
-    
-    lv_obj_set_flex_flow(square, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_flex_align(square,
-                          LV_FLEX_ALIGN_CENTER,
-                          LV_FLEX_ALIGN_CENTER,
-                          LV_FLEX_ALIGN_CENTER);
+
+    //lv_obj_set_flex_flow(square, LV_FLEX_FLOW_COLUMN);
+    //lv_obj_set_flex_align(square,
+    //                      LV_FLEX_ALIGN_CENTER,
+    //                      LV_FLEX_ALIGN_CENTER,
+    //                      LV_FLEX_ALIGN_CENTER);
 
     lv_obj_t *bus_num = lv_label_create(square);
     lv_label_set_text(bus_num, bus.bus_number);
     lv_obj_set_style_text_color(bus_num, lv_color_white(), 0);
-    
+    lv_obj_align(bus_num, LV_ALIGN_CENTER, 0, 0);
 
+    /* label bus name*/
+    lv_obj_t *bus_name = lv_label_create(row);
+    lv_label_set_text(bus_name, bus.bus_name);
+    lv_obj_add_style(bus_name, &style_label_16, LV_STATE_DEFAULT);
+    lv_obj_align(bus_name, LV_ALIGN_LEFT_MID, ROW_HEIGHT, 0);
+
+    /* label minutes from arrival*/
+    lv_obj_t *arrival_time = lv_label_create(row);
+    lv_label_set_text(arrival_time, bus.eta);
+    lv_obj_add_style(arrival_time, &style_label_16, LV_STATE_DEFAULT);
+    lv_obj_align(arrival_time, LV_ALIGN_RIGHT_MID, -PADDING - 15, 0);
 }
 
 void ui_load_screen_bus(lv_obj_t *screen) {
@@ -113,7 +125,9 @@ void ui_load_screen_bus(lv_obj_t *screen) {
         .bus_id = 55,
         .bus_name = "Villazzano 3",
         .bus_number = "3",
-        .delay = 0
+        .delay = 0,
+        .eta = "6'"
+
     };
     create_bus_row(bus1, screen, 0);
 }

@@ -70,22 +70,23 @@ static void clock_update(uint8_t h, uint8_t m) {
 /* create right clock */
 static void clock_timer_cb(lv_timer_t *t) {
     time_t now;
-    struct tm timeinfo;
+    //struct tm timeinfo;
 
     time(&now);
-    localtime_r(&now, &timeinfo);
+    //localtime_r(&now, &timeinfo);
+    struct tm *timeinfo = localtime(&now);
 
     static int hour = -1;
     static int minute = -1;
 
-    if (hour != timeinfo.tm_hour || minute != timeinfo.tm_min) {
-        clock_update(timeinfo.tm_hour, timeinfo.tm_min);
+    if (hour != timeinfo->tm_hour || minute != timeinfo->tm_min) {
+        clock_update(timeinfo->tm_hour, timeinfo->tm_min);
     }
 
     ESP_LOGI(TAG, "%02d:%02d", hour, minute);
 
-    hour = timeinfo.tm_hour;
-    minute = timeinfo.tm_min;
+    hour = timeinfo->tm_hour;
+    minute = timeinfo->tm_min;
 }
 
 /* create clock hands */
