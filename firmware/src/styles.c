@@ -1,5 +1,7 @@
 #include "styles.h"
 
+LV_FONT_DECLARE(lv_font_montserrat_16_extended); 
+
 lv_style_t style_title;
 lv_style_t style_subtitle;
 lv_style_t style_par;
@@ -41,5 +43,5 @@ void styles_init() {
     /* style of label_16 */
     lv_style_init(&style_label_16);
     lv_style_set_text_color(&style_label_16, lv_color_make(0x3E, 0x15, 0x00));
-    lv_style_set_text_font(&style_label_16, &lv_font_montserrat_16);
+    lv_style_set_text_font(&style_label_16, &lv_font_montserrat_16_extended);
 }
