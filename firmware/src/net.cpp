@@ -11,7 +11,7 @@
 /*! Sdrumo Modules */
 #include "net.h"
 #include "config.h"
-#include "esp_err.h"
+#include "freertos/projdefs.h"
 #include "result.h"
 /*! ESP-IDF Components */
 #include "freertos/task.h"
@@ -21,12 +21,16 @@
 #include "esp_log.h"
 #include "esp_netif.h"
 #include "esp_smartconfig.h"
+#include "esp_err.h"
+#include "esp_netif_sntp.h"
+#include "esp_sntp.h"
 /*! Standard Library */
 #include <cassert>
 #include <cstring>
 
 constexpr std::size_t NET_SSID_SIZE = 33U;
 constexpr std::size_t NET_PASSWORD_SIZE = 65U;
+constexpr std::size_t NET_SNTP_WAIT_MS = 10000U;
 
 static const char *NET_TAG = "NET";
 
@@ -72,6 +76,7 @@ void NetHandler::event_handler(void *arg, esp_event_base_t event_base, std::int3
     if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ESP_LOGI(NET_TAG, "Connected to AP \"%s\"", config.get_ssid());
 
+        net.connected = true;
         net.retry_count = 0;
         xEventGroupSetBits(net.event_group, NET_CONNECTED_BIT);
 
@@ -98,9 +103,6 @@ void NetHandler::event_handler(void *arg, esp_event_base_t event_base, std::int3
 
         auto *evt =
             static_cast<smartconfig_event_got_ssid_pswd_t *>(event_data);
-
-        // std::copy(evt->ssid, evt->ssid + SSID_SIZE - 1, config.get_ssid.begin());
-        // std::copy(evt->password, evt->password + PASSWORD_SIZE - 1, config.get_password().begin());
 
         char ssid[33U] = { 0 };
         char password[65U] = { 0 };
@@ -149,9 +151,9 @@ void NetHandler::smartconfig_task(void *args) {
     ESP_ERROR_CHECK(esp_smartconfig_start(&cfg));
     while (true) {
         bits = xEventGroupWaitBits(net_handler.event_group, NET_CONNECTED_BIT | NET_ESPTOUCH_DONE_BIT, true, false, portMAX_DELAY);
-        if (bits & NET_CONNECTED_BIT) {
-            ESP_LOGI(NET_TAG, "WiFi Connected to ap");
-        }
+        // if (bits & NET_CONNECTED_BIT) {
+        //     ESP_LOGI(NET_TAG, "WiFi Connected to ap");
+        // }
         if (bits & NET_ESPTOUCH_DONE_BIT) {
             ESP_LOGI(NET_TAG, "Smartconfig over");
             esp_smartconfig_stop();
@@ -204,10 +206,24 @@ void NetHandler::init_connection(void) {
         ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &cfg));
     } else {
         ESP_LOGE(NET_TAG, "Failed to load Wi-Fi credentials: %s", result_get_err_msg());
-        // abort();
     }
 
     ESP_ERROR_CHECK(esp_wifi_start());
+}
+
+Result NetHandler::sync_time(void) {
+    ESP_LOGD(NET_TAG, "Now executing %s", __func__);    
+
+    esp_sntp_config_t config = ESP_NETIF_SNTP_DEFAULT_CONFIG("it.pool.ntp.org");
+    esp_netif_sntp_init(&config);
+
+    esp_err_t res = esp_netif_sntp_sync_wait(pdMS_TO_TICKS(NET_SNTP_WAIT_MS));
+    if ( res != ESP_OK) {
+        result_set_err_msg("SNTP synchronization failed [%s]", esp_err_to_name(res));
+        return Result::SYNC_FAILED;
+    }
+
+    return Result::SUCCESS;
 }
 
 void NetHandler::deinit_connection(void) {
@@ -237,6 +253,11 @@ void NetHandler::deinit_connection(void) {
 
     this->retry_count = 0;
     this->came_from_smartconfig = false;
+    this->connected = false;
 
     ESP_LOGI(NET_TAG, "Network deinitialized successfully");
+}
+
+bool NetHandler::is_connected(void) {
+    return this->connected;
 }

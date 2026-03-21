@@ -27,7 +27,6 @@ enum class Result {
      * \defgroup      CommonResultCodes Common Result Codes
      * @{
      */
-
     SUCCESS,                 /*!< Everything's OK */
     UNKNOWN_ERROR,           /*!< Unknown error */
     INVALID_ARGUMENT,        /*!< Invalid argument passed to function */
@@ -48,6 +47,17 @@ enum class Result {
     ACTION_ALREADY_REGISTERED, /*!< Action already registered */
     ACTION_NOT_REGISTERED,     /*!< Action not registered */
     INVALID_NEXT_STATE,        /*!< Invalid FSM next state */
+
+    /*!
+     * @}
+     */
+
+    /*!
+     * \defgroup      NetworkRelatedResultCodes Network related Result Codes
+     * @{
+     */
+
+    SYNC_FAILED,              /*!< Synchronization failed for some reason */
 
     /*!
      * @}

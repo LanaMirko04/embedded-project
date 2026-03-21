@@ -56,6 +56,14 @@ class NetHandler {
     void init_connection(void);
 
     /*!
+     * \brief       Sync current time using an SNTP server.
+     * \retval      Result TBD
+     */
+    Result sync_time(void);
+
+    bool is_connected(void);
+
+    /*!
      * \brief       Deinitializes Wi-Fi and frees internal resources.
      */
     void deinit_connection(void);
@@ -68,6 +76,7 @@ class NetHandler {
     std::atomic_size_t retry_count;         /*!< Retry count for Wi-Fi connection attempts. */
     std::atomic_bool smartconfig_running;   /*!< Flag indicating if SmartConfig is running. */
     std::atomic_bool came_from_smartconfig; /*!< Flag indicating if connection came from SmartConfig. */
+    std::atomic_bool connected;
 
     /*!
      * \brief       Wi-Fi and SmartConfig event handler callback.
@@ -89,7 +98,7 @@ class NetHandler {
     /*!
      * \brief       Private constructor for the singleton.
      */
-    NetHandler() : event_group(nullptr), retry_count(0U), smartconfig_running(false), came_from_smartconfig(false) {
+    NetHandler() : event_group(nullptr), retry_count(0U), smartconfig_running(false), came_from_smartconfig(false), connected(false) {
     }
 };
 

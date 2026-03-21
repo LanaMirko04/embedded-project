@@ -62,6 +62,9 @@ const char *result_to_str(Result result) {
         case Result::INVALID_NEXT_STATE:
             return "INVALID_NEXT_STATE";
 
+        case Result::SYNC_FAILED:
+            return "SYNC_FAILED";
+
         case Result::UNKNOWN_ERROR:
         default:
             return "UNKNOWN_ERROR";

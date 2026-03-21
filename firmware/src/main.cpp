@@ -62,7 +62,13 @@ extern "C" void app_main(void) {
 
     ESP_ERROR_CHECK(nvs_flash_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default()); // TODO: proper init function
-    NetHandler::get_instance().init_connection();
+
+    NetHandler &net = NetHandler::get_instance();
+    net.init_connection();
+
+    // Fa cagare, ma serve per attendere che si connetta il cazzo
+    while (!net.is_connected());
+    net.sync_time();
 
     extern Screens present_screen_type;
     extern Screens next_screen_type;
