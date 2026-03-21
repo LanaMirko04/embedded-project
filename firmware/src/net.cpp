@@ -13,6 +13,7 @@
 #include "config.h"
 #include "freertos/projdefs.h"
 #include "result.h"
+#include <time.h>
 /*! ESP-IDF Components */
 #include "freertos/task.h"
 #include "freertos/event_groups.h"

@@ -389,6 +389,7 @@ CMakeUserPresets.json
 .DS_Store
 Thumbs.db
 **/*.old
+firmware/managed_components
 
 ### Binary and compiled files ###
 *.bin
