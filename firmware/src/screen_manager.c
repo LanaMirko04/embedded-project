@@ -49,6 +49,9 @@ void ui_load_screen(lv_obj_t *screen) {
             ui_load_arrows_btn(screen);
             break;
         case SCREEN_WEATHER:
+            ui_load_screen_alarm(screen);
+            ui_load_arrows_btn(screen);
+            break;
         case SCREEN_NUMBER:
             ui_load_screen_wifi(screen);
             ui_load_arrows_btn(screen);

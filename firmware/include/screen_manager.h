@@ -18,6 +18,8 @@
 #include "screen_wifi.h"
 #include "screen_clock.h"
 #include "screen_bus.h"
+#include "screen_weather.h"
+#include "screen_alarm.h"
 #include "ui_navigation.h"
 #include "utiles.h"
 
