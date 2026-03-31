@@ -38,7 +38,7 @@ void ui_load_arrows_btn(lv_obj_t *screen){
 
     lv_obj_add_event_cb(btn_arrow_right, ui_event_arrow_right, LV_EVENT_CLICKED, NULL);
 
-
+    /* btn arrow left */
     lv_obj_t *btn_arrow_left = lv_button_create(screen);
     lv_obj_add_style(btn_arrow_left, &style_btn, 0);
     lv_obj_add_style(btn_arrow_left, &style_btn_pressed, LV_STATE_PRESSED);
