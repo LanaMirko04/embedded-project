@@ -2,3 +2,4 @@
 
 Screens present_screen_type;
 Screens next_screen_type;
+bool change_status = false;

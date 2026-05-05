@@ -9,7 +9,12 @@ static void screen_timer_cb(lv_timer_t *t) {
     if (present_screen_type != next_screen_type) {
         present_screen_type = next_screen_type;
         ui_load_screen(screen);
-        ESP_LOGI(TAG, "screen type %d", present_screen_type);
+        ESP_LOGI(TAG, "screen type %d", present_screen_type);  
+    }
+
+    if(change_status){
+        ui_load_screen(screen);
+        change_status = false;
     }
 }
 
@@ -31,8 +36,7 @@ void ui_load_screen(lv_obj_t *screen) {
 
     switch (present_screen_type) {
         case SCREEN_BOOT:
-            ui_load_screen_bus(screen);
-            //ui_load_screen_boot(screen);
+            ui_load_screen_boot(screen);
             ui_load_arrows_btn(screen);
             break;
         case SCREEN_WIFI:
@@ -48,11 +52,11 @@ void ui_load_screen(lv_obj_t *screen) {
             ui_load_screen_bus(screen);
             ui_load_arrows_btn(screen);
             break;
-        case SCREEN_WEATHER:
+        case SCREEN_ALARM:
             ui_load_screen_alarm(screen);
             ui_load_arrows_btn(screen);
             break;
-        case SCREEN_NUMBER:
+        default:
             ui_load_screen_wifi(screen);
             ui_load_arrows_btn(screen);
     }
