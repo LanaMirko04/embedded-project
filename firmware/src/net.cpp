@@ -35,6 +35,22 @@ constexpr std::size_t NET_SNTP_WAIT_MS = 10000U;
 
 static const char *NET_TAG = "NET";
 
+void NetHandler::start_smartconfig(void) {
+    if (this->smartconfig_running) {
+        return;
+    }
+
+    this->smartconfig_running = true;
+    this->came_from_smartconfig = true;
+
+    if (xTaskCreate(NetHandler::smartconfig_task, "smartconfig", 4096, nullptr, 3, &this->sc_task_handle) != pdPASS) {
+        ESP_LOGE(NET_TAG, "Failed to create SmartConfig task");
+        this->smartconfig_running = false;
+        this->came_from_smartconfig = false;
+        this->sc_task_handle = nullptr;
+    }
+}
+
 void NetHandler::event_handler(void *arg, esp_event_base_t event_base, std::int32_t event_id, void *event_data) {
     ESP_LOGD(NET_TAG, "Now executing %s", __func__);
 
@@ -44,10 +60,15 @@ void NetHandler::event_handler(void *arg, esp_event_base_t event_base, std::int3
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         ESP_LOGI(NET_TAG, "WiFi STA started");
 
-        if (!net.smartconfig_running && config.get_ssid() != 0U && config.get_password() != 0U) {
+        if (net.smartconfig_running) {
+            return;
+        }
+
+        if (config.get_ssid()[0U] != '\0' && config.get_password()[0U] != '\0') {
             esp_wifi_connect();
         } else {
-            ESP_LOGI(NET_TAG, "SmartConfig running, skip auto-connect");
+            ESP_LOGW(NET_TAG, "No credentials, starting SmartConfig immediately");
+            net.start_smartconfig();
         }
 
         return;
@@ -63,13 +84,7 @@ void NetHandler::event_handler(void *arg, esp_event_base_t event_base, std::int3
             esp_wifi_connect();
         } else {
             ESP_LOGE(NET_TAG, "Max retries reached, starting SmartConfig");
-
-            if (!net.smartconfig_running) {
-                net.smartconfig_running = true;
-                net.came_from_smartconfig = true;
-
-                xTaskCreate(NetHandler::smartconfig_task, "NetHandler::smartconfig_task", 4096, nullptr, 3, nullptr);
-            }
+            net.start_smartconfig();
         }
         return;
     }
@@ -110,6 +125,9 @@ void NetHandler::event_handler(void *arg, esp_event_base_t event_base, std::int3
         memcpy(ssid, evt->ssid, sizeof(evt->ssid));
         memcpy(password, evt->password, sizeof(evt->password));
 
+        ESP_LOGD(NET_TAG, "SmartConfig SSID: \"%s\"", ssid);
+        ESP_LOGD(NET_TAG, "SmartConfig password: \"%s\"", password);
+
         config.set_ssid(ssid, NET_SSID_SIZE);
         config.set_password(password, NET_PASSWORD_SIZE);
         config.store();
@@ -124,6 +142,8 @@ void NetHandler::event_handler(void *arg, esp_event_base_t event_base, std::int3
         memcpy(cfg.sta.ssid, evt->ssid, sizeof(cfg.sta.ssid));
         memcpy(cfg.sta.password, evt->password, sizeof(cfg.sta.password));
 
+        net.retry_count = 0;
+
         ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &cfg));
         ESP_ERROR_CHECK(esp_wifi_connect());
 
@@ -132,9 +152,6 @@ void NetHandler::event_handler(void *arg, esp_event_base_t event_base, std::int3
 
     if (event_base == SC_EVENT && event_id == SC_EVENT_SEND_ACK_DONE) {
         ESP_LOGI(NET_TAG, "SmartConfig completed");
-
-        esp_smartconfig_stop();
-        net.smartconfig_running = false;
 
         xEventGroupSetBits(net.event_group, NET_ESPTOUCH_DONE_BIT);
         return;
@@ -152,12 +169,11 @@ void NetHandler::smartconfig_task(void *args) {
     ESP_ERROR_CHECK(esp_smartconfig_start(&cfg));
     while (true) {
         bits = xEventGroupWaitBits(net_handler.event_group, NET_CONNECTED_BIT | NET_ESPTOUCH_DONE_BIT, true, false, portMAX_DELAY);
-        // if (bits & NET_CONNECTED_BIT) {
-        //     ESP_LOGI(NET_TAG, "WiFi Connected to ap");
-        // }
         if (bits & NET_ESPTOUCH_DONE_BIT) {
             ESP_LOGI(NET_TAG, "Smartconfig over");
             esp_smartconfig_stop();
+            net_handler.smartconfig_running = false;
+            net_handler.sc_task_handle = nullptr;
             vTaskDelete(nullptr);
         }
     }
@@ -171,7 +187,7 @@ NetHandler &NetHandler::get_instance(void) {
 }
 
 void NetHandler::init_connection(void) {
-    ESP_LOGD(NET_TAG, "Now executing %s", __func__);
+    esp_log_level_set(NET_TAG, ESP_LOG_DEBUG);
 
     static bool netif_initialized = false;
     Config &config = Config::get_instance();
@@ -235,6 +251,11 @@ void NetHandler::deinit_connection(void) {
         this->smartconfig_running = false;
     }
 
+    if (this->sc_task_handle != nullptr) {
+        vTaskDelete(this->sc_task_handle);
+        this->sc_task_handle = nullptr;
+    }
+
     esp_wifi_disconnect();
     ESP_ERROR_CHECK(esp_wifi_stop());
 
@@ -255,10 +276,7 @@ void NetHandler::deinit_connection(void) {
     this->retry_count = 0;
     this->came_from_smartconfig = false;
     this->connected = false;
+    this->sc_task_handle = nullptr;
 
     ESP_LOGI(NET_TAG, "Network deinitialized successfully");
-}
-
-bool NetHandler::is_connected(void) {
-    return this->connected;
 }

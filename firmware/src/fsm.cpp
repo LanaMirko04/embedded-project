@@ -69,7 +69,7 @@ Result Fsm::transition_to(Fsm::State next_state) {
         return Result::INVALID_ARGUMENT;
     }
 
-    if (this->is_valid_transition(next_state)) {
+    if (!this->is_valid_transition(next_state)) {
         result_set_err_msg("Transition from state %s to state %s not allowed", Fsm::state_to_str(this->curr_state).data(), Fsm::state_to_str(next_state).data());
         return Result::INVALID_NEXT_STATE;
     }
@@ -79,8 +79,11 @@ Result Fsm::transition_to(Fsm::State next_state) {
         return Result::ACTION_NOT_REGISTERED;
     }
 
-    this->curr_state = next_state;
-    return this->actions[static_cast<std::size_t>(next_state)]();
+    Result res = this->actions[static_cast<std::size_t>(next_state)]();
+    if (res == Result::SUCCESS) {
+        this->curr_state = next_state;
+    }
+    return res;
 }
 
 Fsm::Fsm(void) : curr_state(Fsm::State::NO_STATE) {

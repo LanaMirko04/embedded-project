@@ -35,6 +35,10 @@ constexpr int NET_ESPTOUCH_DONE_BIT = BIT1; /*!< Bit that indicates that Sdrumo 
  */
 class NetHandler {
   public:
+    std::atomic_bool smartconfig_running;   /*!< Flag indicating if SmartConfig is running. */
+    std::atomic_bool connected; /*!< Flag indicating if Wi-Fi connection is active */
+
+    
     /*!
      * \brief       Deleted copy constructor.
 */
@@ -61,8 +65,6 @@ class NetHandler {
      */
     Result sync_time(void);
 
-    bool is_connected(void);
-
     /*!
      * \brief       Deinitializes Wi-Fi and frees internal resources.
      */
@@ -73,10 +75,9 @@ class NetHandler {
 
     EventGroupHandle_t event_group;         /*!< Event group handle for Wi-Fi events. */
     esp_netif_t *sta_netif;                 /*!< Station network interface handle. */
+    TaskHandle_t sc_task_handle;            /*!< SmartConfig task handle, nullptr when not running. */
     std::atomic_size_t retry_count;         /*!< Retry count for Wi-Fi connection attempts. */
-    std::atomic_bool smartconfig_running;   /*!< Flag indicating if SmartConfig is running. */
     std::atomic_bool came_from_smartconfig; /*!< Flag indicating if connection came from SmartConfig. */
-    std::atomic_bool connected;
 
     /*!
      * \brief       Wi-Fi and SmartConfig event handler callback.
@@ -95,11 +96,12 @@ class NetHandler {
      */
     static void smartconfig_task(void *args);
 
+    void start_smartconfig(void);
+
     /*!
      * \brief       Private constructor for the singleton.
      */
-    NetHandler() : event_group(nullptr), retry_count(0U), smartconfig_running(false), came_from_smartconfig(false), connected(false) {
-    }
+    NetHandler() : smartconfig_running(false), connected(false), event_group(nullptr), sta_netif(nullptr), sc_task_handle(nullptr), retry_count(0U) {}
 };
 
 #endif /*! NET_H */
