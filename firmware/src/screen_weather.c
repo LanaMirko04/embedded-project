@@ -1,10 +1,11 @@
 #include "screen_weather.h"
+#include ""
 
 static const char *TAG = "screen_weather";
 
-char city[32];
 
 typedef struct {
+    char city[32];
     char date[32];
 
     int today_temp;
@@ -14,12 +15,15 @@ typedef struct {
     int today_rain;
     int today_wind;
 
+    char day1[4];
     char weather_1[32];
     int temp_1;
 
+    char day2[4];
     char weather_2[32];
     int temp_2;
 
+    char day3[4];
     char weather_3[32];
     int temp_3;
 
