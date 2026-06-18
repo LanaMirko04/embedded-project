@@ -11,3 +11,5 @@
 
 
 void ui_load_screen_alarm(lv_obj_t *screen);
+
+extern char alarm_data[6];

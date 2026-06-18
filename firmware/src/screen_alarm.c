@@ -1,6 +1,17 @@
 #include "screen_alarm.h"
+#include "core/lv_obj_event.h"
+#include "core/lv_obj_pos.h"
+#include "esp_log.h"
 #include "images/arrow_down.c"
 #include "images/arrow_up.c"
+#include "misc/lv_area.h"
+#include "misc/lv_event.h"
+#include "misc/lv_types.h"
+#include "styles.h"
+#include "utiles.h"
+#include "widgets/button/lv_button.h"
+#include "widgets/label/lv_label.h"
+#include <stdio.h>
 
 #define MARGIN_Y 49
 #define MARGIN_X 39
@@ -9,6 +20,8 @@
 #define HEIGHT 78
 
 static const char *TAG = "screen_alarm";
+
+char alarm_data[6] = "00:00";
 
 typedef struct {
     unsigned char val;
@@ -37,6 +50,18 @@ void set_button_style(lv_obj_t *btn) {
 
     lv_obj_set_size(btn, 53, 16);
 }
+
+/* style of select and cancel buttons */
+void set_ext_button_style(lv_obj_t *btn){
+    lv_obj_add_style(btn, &style1_btn, 0);
+    lv_obj_add_style(btn, &style1_btn_pressed, LV_STATE_PRESSED);
+    lv_obj_add_style(btn, &style1_btn, LV_STATE_FOCUSED);
+    lv_obj_add_style(btn, &style1_btn, LV_STATE_DISABLED);
+
+    lv_obj_set_size(btn, 64, 28);
+}
+
+
 
 /*event button down*/
 void ui_event_btn_down(lv_event_t *e) {
@@ -83,6 +108,16 @@ void ui_event_btn_up_10(lv_event_t *e) {
     //ESP_LOGI(TAG, "h1: %d", data->val);
 }
 
+
+void ui_event_cancel(lv_event_t *e){
+    next_screen_type = SCREEN_CLOCK;
+}
+
+void ui_event_select(lv_event_t *e){
+    snprintf(alarm_data, sizeof(alarm_data), "%02d:%02d", h_1.val%24, m_1.val%60);
+    ESP_LOGI(TAG, "Alarm data: %s", alarm_data);
+    next_screen_type = SCREEN_CLOCK;
+}
 
 
 
@@ -242,4 +277,30 @@ void ui_load_screen_alarm(lv_obj_t *screen) {
     lv_obj_add_event_cb(btn_up_m2, ui_event_btn_up, LV_EVENT_CLICKED, &m_1);
 
 
+
+    /* button cancel  */
+    lv_obj_t *btn_cancel = lv_button_create(screen);
+    set_ext_button_style(btn_cancel);
+    lv_obj_align(btn_cancel, LV_ALIGN_BOTTOM_MID, - 48, - 48);
+    
+    lv_obj_t *label_cnc = lv_label_create(btn_cancel);
+    lv_label_set_text(label_cnc, "Cancel");
+    //lv_obj_center(label);
+    lv_obj_add_style(label_cnc, &style_label_16, LV_STATE_DEFAULT);
+    lv_obj_align(label_cnc, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_add_event_cb(btn_cancel, ui_event_cancel, LV_EVENT_CLICKED, NULL);
+
+
+
+    /* button select */
+    lv_obj_t *btn_select = lv_button_create(screen);
+    set_ext_button_style(btn_select);
+    lv_obj_align(btn_select, LV_ALIGN_BOTTOM_MID, 48, - 48);
+    
+    lv_obj_t *label_slc = lv_label_create(btn_select);
+    lv_label_set_text(label_slc, "Set");
+    //lv_obj_center(label);
+    lv_obj_add_style(label_slc, &style_label_16, LV_STATE_DEFAULT);
+    lv_obj_align(label_slc, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_add_event_cb(btn_select, ui_event_select, LV_EVENT_CLICKED, NULL);
 }

@@ -1,4 +1,7 @@
 #include "styles.h"
+#include "misc/lv_color.h"
+#include "misc/lv_style.h"
+#include "misc/lv_style_gen.h"
 
 LV_FONT_DECLARE(lv_font_montserrat_16_extended); 
 
@@ -7,6 +10,8 @@ lv_style_t style_subtitle;
 lv_style_t style_par;
 lv_style_t style_btn;
 lv_style_t style_btn_pressed;
+lv_style_t style1_btn;
+lv_style_t style1_btn_pressed;
 lv_style_t style_label_16;
 
 
@@ -40,6 +45,17 @@ void styles_init() {
     lv_style_set_bg_color(&style_btn_pressed, lv_color_black());
     lv_style_set_bg_opa(&style_btn_pressed, LV_OPA_30);
 
+    /* style1 of button */
+    lv_style_init(&style1_btn);
+    lv_style_set_bg_color(&style1_btn, lv_color_hex(0xE6DcD2));
+    lv_style_set_border_opa(&style1_btn, LV_OPA_TRANSP);
+    lv_style_set_shadow_opa(&style1_btn, LV_OPA_TRANSP);
+    
+    lv_style_init(&style1_btn_pressed);
+    lv_style_set_bg_color(&style1_btn_pressed, lv_color_hex(0xE6DcD2));
+    lv_style_set_border_opa(&style1_btn_pressed, LV_OPA_TRANSP);
+    lv_style_set_shadow_opa(&style1_btn_pressed, LV_OPA_TRANSP);
+    
     /* style of label_16 */
     lv_style_init(&style_label_16);
     lv_style_set_text_color(&style_label_16, lv_color_make(0x3E, 0x15, 0x00));

@@ -1,3 +1,4 @@
+#include "screen_alarm.h"
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -167,7 +168,7 @@ void ui_load_screen_clock(lv_obj_t *screen) {
 
     /* alarm label */
     label_alarm = lv_label_create(screen);
-    lv_label_set_text(label_alarm, "00:00"); // initial value
+    lv_label_set_text(label_alarm, alarm_data); // initial value
     lv_obj_align_to(label_alarm, btn_alarm, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
     lv_obj_add_style(label_alarm, &style_par, 0);
 
