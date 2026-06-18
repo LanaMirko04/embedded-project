@@ -20,6 +20,7 @@
 #include "screen_bus.h"
 #include "screen_weather.h"
 #include "screen_alarm.h"
+#include "screen_timer.h"
 #include "ui_navigation.h"
 #include "utiles.h"
 

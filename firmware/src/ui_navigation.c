@@ -5,7 +5,7 @@
 const char * TAGG = "ui_navigation";
 
 void ui_event_arrow_left(lv_event_t *e){
-    if (present_screen_type == SCREEN_BOOT){
+    if (present_screen_type == SCREEN_CLOCK){
         next_screen_type = SCREEN_NUMBER - 1;
         ESP_LOGI(TAGG, "screen number: %d", next_screen_type);
     } else{

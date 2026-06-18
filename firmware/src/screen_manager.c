@@ -1,4 +1,7 @@
 #include "screen_manager.h"
+#include "screen_weather.h"
+#include "ui_navigation.h"
+#include "utiles.h"
 
 static const char *TAG = "screen_manager";
 
@@ -37,11 +40,11 @@ void ui_load_screen(lv_obj_t *screen) {
     switch (present_screen_type) {
         case SCREEN_BOOT:
             ui_load_screen_boot(screen);
-            ui_load_arrows_btn(screen);
+            //ui_load_arrows_btn(screen);
             break;
         case SCREEN_WIFI:
             ui_load_screen_wifi(screen);
-            ui_load_arrows_btn(screen);
+            //ui_load_arrows_btn(screen);
 
             break;
         case SCREEN_CLOCK:
@@ -54,6 +57,12 @@ void ui_load_screen(lv_obj_t *screen) {
             break;
         case SCREEN_ALARM:
             ui_load_screen_alarm(screen);
+            break;
+        case SCREEN_TIMER:
+            ui_load_screen_timer(screen);
+            break;
+        case SCREEN_WEATHER:
+            ui_load_screen_weather(screen);
             ui_load_arrows_btn(screen);
             break;
         default:

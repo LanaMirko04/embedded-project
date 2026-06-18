@@ -4,13 +4,14 @@
 #include <stdbool.h>
 
 typedef enum {
-    SCREEN_BOOT,
-    SCREEN_WIFI, 
     SCREEN_CLOCK,
     SCREEN_BUS,
-    SCREEN_ALARM,
     SCREEN_WEATHER,
-    SCREEN_NUMBER
+    SCREEN_NUMBER,
+    SCREEN_BOOT,
+    SCREEN_WIFI,
+    SCREEN_ALARM,
+    SCREEN_TIMER,
 } Screens;
 
 extern bool change_status;

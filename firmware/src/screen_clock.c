@@ -1,4 +1,7 @@
+#include "misc/lv_types.h"
 #include "screen_alarm.h"
+#include "screen_timer.h"
+#include "utiles.h"
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -27,13 +30,12 @@ static int clock_cy;
 
 static void clock_update(uint8_t h, uint8_t m);
 
-void ui_event_clock(lv_event_t *e) {
-    static uint8_t counter = 0;
-    //lv_event_code_t event_code = lv_event_get_code(e);
-    //lv_obj_t *btn = (lv_obj_t *)lv_event_get_user_data(e);
-    //if (event_code == LV_EVENT_CLICKED) {
-    counter++;
-    //}
+void ui_event_timer(lv_event_t *e) {
+    next_screen_type = SCREEN_TIMER;
+}
+
+void ui_event_alarm(lv_event_t *e){
+    next_screen_type = SCREEN_ALARM;
 }
 
 /* destroy timer */
@@ -142,11 +144,11 @@ void ui_load_screen_clock(lv_obj_t *screen) {
     lv_obj_center(img_timer);
     //lv_obj_clear_flag(img_timer, LV_OBJ_FLAG_CLICKABLE);
 
-    lv_obj_add_event_cb(btn_timer, ui_event_clock, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb(btn_timer, ui_event_timer, LV_EVENT_CLICKED, NULL);
 
     /* timer label */
     label_timer = lv_label_create(screen);
-    lv_label_set_text(label_timer, "00:00"); // initial value
+    lv_label_set_text(label_timer, timer_data); // initial value
     lv_obj_align_to(label_timer, btn_timer, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
     lv_obj_add_style(label_timer, &style_par, 0);
 
@@ -164,7 +166,7 @@ void ui_load_screen_clock(lv_obj_t *screen) {
     lv_img_set_src(img_alarm, &alarm1);
     lv_obj_center(img_alarm);
 
-    lv_obj_add_event_cb(btn_alarm, ui_event_clock, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb(btn_alarm, ui_event_alarm, LV_EVENT_CLICKED, NULL);
 
     /* alarm label */
     label_alarm = lv_label_create(screen);
