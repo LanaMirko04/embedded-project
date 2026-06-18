@@ -1,7 +1,4 @@
-from flask import (
-    Blueprint, flash, g, redirect, render_template, request, session, url_for
-)
-
+from flask import Blueprint, request
 import requests
 from datetime import datetime
 
@@ -54,179 +51,133 @@ def get_current_hour_index(current_time, hourly_times):
     except Exception:
         return hourly_times.index(current_time) if current_time in hourly_times else 0
 
+_ICON_MAP = {
+    'sunny':        'sunny',
+    'mostly sunny': 'sunny',
+    'partly cloudy':'partly_cloudy',
+    'mostly cloudy':'cloudy',
+    'overcast':     'cloudy',
+    'rainy':        'rainy',
+    'showers':      'rainy',
+    'snowfall':     'snow',
+}
+
+def weather_icon(label):
+    return _ICON_MAP.get(label, 'sunny')
+
+def weather_display(label):
+    return label.title()
+
 @bp.route('/getWeather/<token>', methods=['GET'])
 def get_weather(token):
-
     db = get_db()
 
-    lat = db.execute(
-        'SELECT location_latitude FROM sdrumos WHERE token = ?',
-        (token,)
-    ).fetchone()
-    lon = db.execute(
-        'SELECT location_longitude FROM sdrumos WHERE token = ?',
+    row = db.execute(
+        'SELECT location, location_latitude, location_longitude FROM sdrumos WHERE token = ?',
         (token,)
     ).fetchone()
 
-    if not lat or not lon:
+    if not row or row['location_latitude'] is None or row['location_longitude'] is None:
         return {'error': 'Latitude and longitude are required'}, 400
 
+    city = row['location'] if row['location'] else None
+
     params = {
-        'latitude': lat,
-        'longitude': lon,
-        'hourly': 'temperature_2m,apparent_temperature,rain,showers,snowfall,cloud_cover',
+        'latitude': row['location_latitude'],
+        'longitude': row['location_longitude'],
+        'hourly': 'temperature_2m,rain,showers,snowfall,cloud_cover,relative_humidity_2m,precipitation_probability',
         'models': 'italia_meteo_arpae_icon_2i',
         'current_weather': 'true',
-        'precipitation': 'true',
-        'rain': 'true',
-        'showers': 'true',
-        'snowfall': 'true',
-        'wind_speed_10m': 'true',
         'timezone': 'Europe/Berlin',
-        'forecast_days': 3,
-        'daily': 'temperature_2m_max,temperature_2m_min,rain_sum,showers_sum,snowfall_sum,precipitation_hours'
+        'forecast_days': 4,
+        'daily': 'temperature_2m_max,rain_sum,showers_sum,snowfall_sum'
     }
 
     try:
         response = requests.get(weather_api_url, params=params)
-        if response.status_code == 200:
-            data = response.json()
-            hourly = data.get('hourly', {})
-            hourly_times = hourly.get('time', [])
-
-            daily_averages = {}
-            if hourly_times:
-                today_date = hourly_times[0].split('T')[0]
-                sums = {}
-                counts = {}
-
-                metrics = [
-                    'temperature_2m',
-                    'apparent_temperature',
-                    'rain',
-                    'showers',
-                    'snowfall',
-                    'cloud_cover'
-                ]
-
-                for idx, time_str in enumerate(hourly_times):
-                    date_key = time_str.split('T')[0]
-                    if date_key == today_date:
-                        continue
-
-                    if date_key not in sums:
-                        sums[date_key] = {metric: 0.0 for metric in metrics}
-                        counts[date_key] = {metric: 0 for metric in metrics}
-
-                    for metric in metrics:
-                        values = hourly.get(metric, [])
-                        if idx < len(values) and values[idx] is not None:
-                            sums[date_key][metric] += float(values[idx])
-                            counts[date_key][metric] += 1
-
-                dates = sorted(sums.keys())
-                daily_averages = {
-                    'days': dates,
-                    'temperature_avg': [],
-                    'apparent_temperature_avg': [],
-                    'cloud_cover_avg': [],
-                    'weather': []
-                }
-
-                for date_key in dates:
-                    day_rain_avg = None
-                    day_showers_avg = None
-                    day_snowfall_avg = None
-                    day_cloud_cover_avg = None
-
-                    for metric, out_key in [
-                        ('temperature_2m', 'temperature_avg'),
-                        ('apparent_temperature', 'apparent_temperature_avg'),
-                        ('cloud_cover', 'cloud_cover_avg')
-                    ]:
-                        count = counts[date_key][metric]
-                        avg = (sums[date_key][metric] / count) if count else None
-                        daily_averages[out_key].append(avg)
-
-                    for metric in ['rain', 'showers', 'snowfall', 'cloud_cover']:
-                        count = counts[date_key][metric]
-                        avg = (sums[date_key][metric] / count) if count else None
-                        if metric == 'rain':
-                            day_rain_avg = avg
-                        elif metric == 'showers':
-                            day_showers_avg = avg
-                        elif metric == 'snowfall':
-                            day_snowfall_avg = avg
-                        elif metric == 'cloud_cover':
-                            day_cloud_cover_avg = avg
-
-                    daily_averages['weather'].append(
-                        classify_hour_weather(
-                            day_cloud_cover_avg,
-                            day_rain_avg,
-                            day_showers_avg,
-                            day_snowfall_avg,
-                        )
-                    )
-            all_hourly_times = data['hourly']['time']
-            all_hourly_temperature = data['hourly']['temperature_2m']
-            all_hourly_apparent_temperature = data['hourly']['apparent_temperature']
-            all_hourly_rain = data['hourly']['rain']
-            all_hourly_showers = data['hourly']['showers']
-            all_hourly_snowfall = data['hourly']['snowfall']
-            all_hourly_cloud_cover = data['hourly']['cloud_cover']
-
-            current_time = data['current_weather']['time']
-            current_idx = get_current_hour_index(current_time, all_hourly_times)
-            current_weather_label = classify_hour_weather(
-                all_hourly_cloud_cover[current_idx] if current_idx < len(all_hourly_cloud_cover) else 0,
-                all_hourly_rain[current_idx] if current_idx < len(all_hourly_rain) else 0,
-                all_hourly_showers[current_idx] if current_idx < len(all_hourly_showers) else 0,
-                all_hourly_snowfall[current_idx] if current_idx < len(all_hourly_snowfall) else 0,
-            )
-
-            # current weather without interval, weathercode, winddirection
-            current_weather = {
-                'is_day': data['current_weather']['is_day'],
-                'temperature': data['current_weather']['temperature'],
-                'time': current_time,
-                'weather': current_weather_label,
-            }
-            slice_start = min(current_idx + 1, len(all_hourly_times))
-            slice_end = slice_start + 3
-            hourly_times = all_hourly_times[slice_start:slice_end]
-            hourly_temperature = all_hourly_temperature[slice_start:slice_end]
-            hourly_apparent_temperature = all_hourly_apparent_temperature[slice_start:slice_end]
-            hourly_rain = all_hourly_rain[slice_start:slice_end]
-            hourly_showers = all_hourly_showers[slice_start:slice_end]
-            hourly_snowfall = all_hourly_snowfall[slice_start:slice_end]
-            hourly_cloud_cover = all_hourly_cloud_cover[slice_start:slice_end]
-
-            hourly_weather = []
-            for idx in range(len(hourly_times)):
-                hourly_weather.append(
-                    classify_hour_weather(
-                        hourly_cloud_cover[idx] if idx < len(hourly_cloud_cover) else 0,
-                        hourly_rain[idx] if idx < len(hourly_rain) else 0,
-                        hourly_showers[idx] if idx < len(hourly_showers) else 0,
-                        hourly_snowfall[idx] if idx < len(hourly_snowfall) else 0,
-                    )
-                )
-
-            response = {
-                'current_weather': current_weather,
-                # hourly for the next 3 hours
-                'hourly_today': {
-                    'time': hourly_times,
-                    'temperature': hourly_temperature,
-                    'apparent_temperature': hourly_apparent_temperature,
-                    'weather': hourly_weather
-                },
-                # daily averages for the next days (excluding today)
-                'next_days': daily_averages
-            }
-            return response, 200
-        else:
+        if response.status_code != 200:
             return {'error': 'Failed to fetch weather data'}, response.status_code
+
+        data = response.json()
+        hourly = data.get('hourly', {})
+        hourly_times = hourly.get('time', [])
+
+        current_time = data['current_weather']['time']
+        current_idx = get_current_hour_index(current_time, hourly_times)
+
+        def safe_hourly(key, idx):
+            vals = hourly.get(key, [])
+            return vals[idx] if idx < len(vals) and vals[idx] is not None else 0
+
+        current_weather_label = classify_hour_weather(
+            safe_hourly('cloud_cover', current_idx),
+            safe_hourly('rain', current_idx),
+            safe_hourly('showers', current_idx),
+            safe_hourly('snowfall', current_idx),
+        )
+
+        current_dt = datetime.strptime(current_time, '%Y-%m-%dT%H:%M')
+        current_section = {
+            'date': current_dt.strftime('%a %d %b'),
+            'weather': weather_display(current_weather_label),
+            'weather_icon': weather_icon(current_weather_label),
+            'temperature': round(data['current_weather']['temperature']),
+            'rain_probability': round(safe_hourly('precipitation_probability', current_idx)),
+            'humidity': round(safe_hourly('relative_humidity_2m', current_idx)),
+            'wind_speed': round(data['current_weather']['windspeed']),
+        }
+
+        # daily max temps by date (for forecast temperature)
+        daily_data = data.get('daily', {})
+        daily_max_by_date = {}
+        for date, max_t in zip(daily_data.get('time', []), daily_data.get('temperature_2m_max', [])):
+            daily_max_by_date[date] = max_t
+
+        # compute per-day averages from hourly, excluding today
+        today_date = hourly_times[0].split('T')[0] if hourly_times else None
+        sums = {}
+        counts = {}
+        metrics = ['rain', 'showers', 'snowfall', 'cloud_cover', 'temperature_2m']
+
+        for idx, time_str in enumerate(hourly_times):
+            date_key = time_str.split('T')[0]
+            if date_key == today_date:
+                continue
+            if date_key not in sums:
+                sums[date_key] = {m: 0.0 for m in metrics}
+                counts[date_key] = {m: 0 for m in metrics}
+            for m in metrics:
+                vals = hourly.get(m, [])
+                if idx < len(vals) and vals[idx] is not None:
+                    sums[date_key][m] += float(vals[idx])
+                    counts[date_key][m] += 1
+
+        forecast = []
+        for date_key in sorted(sums.keys()):
+            def day_avg(m):
+                c = counts[date_key][m]
+                return (sums[date_key][m] / c) if c else 0
+
+            label = classify_hour_weather(
+                day_avg('cloud_cover'),
+                day_avg('rain'),
+                day_avg('showers'),
+                day_avg('snowfall'),
+            )
+            max_t = daily_max_by_date.get(date_key)
+            temp = round(max_t) if max_t is not None else round(day_avg('temperature_2m'))
+            forecast.append({
+                'day': datetime.strptime(date_key, '%Y-%m-%d').strftime('%a'),
+                'weather': weather_display(label),
+                'weather_icon': weather_icon(label),
+                'temperature': temp,
+            })
+
+        return {
+            'city': city,
+            'current': current_section,
+            'forecast': forecast,
+        }, 200
+
     except Exception as e:
         return {'error': f'Error fetching weather data: {str(e)}'}, 500

@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: 127.0.0.1:5000/api/sdrumo/weather/getWeather/darkblue-pick-3866
+  url: 127.0.0.1:5000/api/sdrumo/weather/getWeather/snow-project-5840
   auth: inherit
 
 settings:
@@ -13,3 +13,32 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+
+docs: |
+  Returns weather forecast for the sdrumo's configured location.
+
+  Response:
+  ```json
+  {
+    "city": "Trento",
+    "current": {
+      "date": "Thu 18 Jun",
+      "weather": "Mostly Sunny",
+      "weather_icon": "sunny",
+      "temperature": 24,
+      "rain_probability": 0,
+      "humidity": 56,
+      "wind_speed": 8
+    },
+    "forecast": [
+      {
+        "day": "Fri",
+        "weather": "Partly Cloudy",
+        "weather_icon": "partly_cloudy",
+        "temperature": 30
+      }
+    ]
+  }
+  ```
+
+  weather_icon values: sunny | partly_cloudy | cloudy | rainy | storm | snow | fog

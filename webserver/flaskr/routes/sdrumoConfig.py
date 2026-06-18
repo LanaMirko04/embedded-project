@@ -153,7 +153,7 @@ def set_sdrumo_location():
         
         db.execute(
             'UPDATE sdrumos SET location = ?, location_latitude = ?, location_longitude = ? WHERE token = ?',
-            (loc.address, loc.latitude, loc.longitude, token)
+            (location, loc.latitude, loc.longitude, token)
         )
         db.commit()
         updateTimestamp(token)
