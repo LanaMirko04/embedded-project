@@ -172,10 +172,8 @@ class AuthService extends ChangeNotifier {
     switch (normalized.length % 4) {
       case 2:
         normalized += '==';
-        break;
       case 3:
         normalized += '=';
-        break;
     }
     final bytes = base64Url.decode(normalized);
     return json.decode(utf8.decode(bytes));
@@ -211,7 +209,6 @@ class AuthService extends ChangeNotifier {
       final status = resp.statusCode ?? 0;
       final data = resp.data;
       print('Login status: $status');
-      print('Login response: $data');
 
       String? access;
       String? refresh;
@@ -313,8 +310,7 @@ class AuthService extends ChangeNotifier {
       final status = resp.statusCode ?? 0;
       final data = resp.data;
       print('Refresh status: $status');
-      print('Refresh response: $data');
-      
+
       String? access;
       String? refreshTok;
 
