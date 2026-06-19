@@ -15,6 +15,53 @@ def updateTimestamp(token):
     )
     db.commit()
 
+@bp.route('/get/<token>', methods=['GET'])
+@jwt_required()
+def get_sdrumo_config(token):
+    try:
+        user_id = get_jwt_identity()
+        db = get_db()
+
+        sdrumo = db.execute(
+            'SELECT id, name, token, location, location_latitude, location_longitude, stop_id '
+            'FROM sdrumos WHERE token = ? AND user_id = ?',
+            (token, user_id)
+        ).fetchone()
+
+        if not sdrumo:
+            return {'error': 'Sdrumo token not found or not paired with this user'}, 404
+
+        busses = db.execute(
+            'SELECT b.id, b.bus_number, b.bus_name, b.color '
+            'FROM sdrumo_busses sb JOIN busses b ON b.id = sb.bus_id '
+            'WHERE sb.sdrumo_id = ?',
+            (sdrumo['id'],)
+        ).fetchall()
+
+        return {
+            'id': sdrumo['id'],
+            'name': sdrumo['name'],
+            'token': sdrumo['token'],
+            'location': sdrumo['location'],
+            'location_latitude': sdrumo['location_latitude'],
+            'location_longitude': sdrumo['location_longitude'],
+            'stop_id': sdrumo['stop_id'],
+            'busses': [
+                {
+                    'id': bus['id'],
+                    'bus_number': bus['bus_number'],
+                    'bus_name': bus['bus_name'],
+                    'color': bus['color'],
+                }
+                for bus in busses
+            ],
+        }, 200
+
+    except sqlite3.Error as e:
+        return {'error': f'Database error: {str(e)}'}, 500
+    except Exception as e:
+        return {'error': f'Fetching config failed: {str(e)}'}, 500
+
 @bp.route('/pair', methods=['POST'])
 @jwt_required()
 def pair_sdrumo():
@@ -293,6 +340,13 @@ def add_sdrumo_bus():
         if not sdrumo:
             return {'error': 'Sdrumo token not found or not paired with this user'}, 404
         
+        existing = db.execute(
+            'SELECT id FROM sdrumo_busses WHERE sdrumo_id = ? AND bus_id = ?',
+            (sdrumo['id'], bus_id)
+        ).fetchone()
+        if existing:
+            return {'message': 'Bus already added to Sdrumo'}, 200
+
         db.execute(
             'INSERT INTO sdrumo_busses (sdrumo_id, bus_id) VALUES (?, ?)',
             (sdrumo['id'], bus_id)
