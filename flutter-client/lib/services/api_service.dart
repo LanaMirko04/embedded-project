@@ -1,8 +1,10 @@
 import 'package:dio/dio.dart';
 import 'dart:async';
 
-import '../models/user.dart';
 import '../models/sdrumo.dart';
+import '../models/bus_stop.dart';
+import '../models/bus_route.dart';
+import '../models/device_config.dart';
 import '../constants/api_config.dart';
 import 'auth_service.dart';
 
@@ -77,154 +79,6 @@ class ApiService {
         },
       ),
     );
-  }
-
-  Future<User> fetchUserProfile(String userId, {String? bearerToken}) async {
-    final options = Options(headers: {});
-    if (bearerToken != null && bearerToken.isNotEmpty) {
-      options.headers!['Authorization'] = 'Bearer $bearerToken';
-    }
-    final response = await _dio.get('/me', options: options);
-    print(bearerToken);
-    print(response.data);
-    return User.fromJson(response.data);
-  }
-
-  // Accept a Map payload for data
-  Future<Map<String, dynamic>> addPhrase(dynamic phraseOrData, {String? bearerToken}) async {
-    final Map<String, dynamic> data = phraseOrData is Map<String, dynamic>
-        ? Map<String, dynamic>.from(phraseOrData)
-        : phraseOrData.toJson();
-
-    final options = Options(headers: {});
-    if (bearerToken != null && bearerToken.isNotEmpty) {
-      options.headers!['Authorization'] = 'Bearer $bearerToken';
-    }
-
-    final response = await _dio.post(
-      '/addPhrase', // adjust endpoint if different
-      data: data,
-      options: options,
-    );
-
-    // Normalize common response envelopes:
-    // { data: {...} } | { phrase: {...} } | { item: {...} } | {...} | [ {...} ]
-    dynamic payload = response.data;
-    Map<String, dynamic> serverMap = {};
-
-    if (payload is Map<String, dynamic>) {
-      // unwrap common envelopes if present
-      if (payload.containsKey('data') && payload['data'] is Map) {
-        serverMap = Map<String, dynamic>.from(payload['data']);
-      } else if (payload.containsKey('phrase') && payload['phrase'] is Map) {
-        serverMap = Map<String, dynamic>.from(payload['phrase']);
-      } else if (payload.containsKey('item') && payload['item'] is Map) {
-        serverMap = Map<String, dynamic>.from(payload['item']);
-      } else if (payload.containsKey('result') && payload['result'] is Map) {
-        serverMap = Map<String, dynamic>.from(payload['result']);
-      } else {
-        serverMap = Map<String, dynamic>.from(payload);
-      }
-    } else if (payload is List && payload.isNotEmpty && payload.first is Map) {
-      serverMap = Map<String, dynamic>.from(payload.first);
-    } else {
-      // payload is not a map/list (could be id or message). Try to salvage id.
-      if (payload != null) {
-        serverMap = {'id': payload.toString()};
-      }
-    }
-
-    // Merge serverMap with the original request data:
-    // keep original request values as fallback when server didn't return them,
-    // but prefer server values when available.
-    final merged = <String, dynamic>{};
-    merged.addAll(data); // request values as fallback
-    serverMap.forEach((k, v) {
-      if (v != null && v.toString().isNotEmpty)
-        merged[k] = v; // override with server values when present
-    });
-
-    // Ensure there's at least content in the merged map; if not, try to read common text fields
-    if ((merged['content'] == null ||
-            merged['content'].toString().trim().isEmpty) &&
-        serverMap.isNotEmpty) {
-      // try common alternatives
-      merged['content'] =
-          serverMap['text'] ??
-          serverMap['body'] ??
-          serverMap['phrase'] ??
-          merged['content'];
-    }
-
-    return merged;
-  }
-
-  Future<Map<String, dynamic>> updatePhrase(
-    String id,
-    dynamic phraseOrData, {
-    String? bearerToken,
-  }) async {
-    final Map<String, dynamic> data = phraseOrData is Map<String, dynamic>
-        ? Map<String, dynamic>.from(phraseOrData)
-        : phraseOrData.toJson();
-
-    final options = Options(headers: {});
-    if (bearerToken != null && bearerToken.isNotEmpty) {
-      options.headers!['Authorization'] = 'Bearer $bearerToken';
-    }
-
-    final response = await _dio.put(
-      '/updatePhrase/$id',
-      data: data,
-      options: options,
-    );
-
-    // Normalize common response envelopes
-    dynamic payload = response.data;
-    Map<String, dynamic> serverMap = {};
-
-    if (payload is Map<String, dynamic>) {
-      if (payload.containsKey('data') && payload['data'] is Map) {
-        serverMap = Map<String, dynamic>.from(payload['data']);
-      } else if (payload.containsKey('phrase') && payload['phrase'] is Map) {
-        serverMap = Map<String, dynamic>.from(payload['phrase']);
-      } else if (payload.containsKey('item') && payload['item'] is Map) {
-        serverMap = Map<String, dynamic>.from(payload['item']);
-      } else if (payload.containsKey('result') && payload['result'] is Map) {
-        serverMap = Map<String, dynamic>.from(payload['result']);
-      } else {
-        serverMap = Map<String, dynamic>.from(payload);
-      }
-    } else if (payload is List && payload.isNotEmpty && payload.first is Map) {
-      serverMap = Map<String, dynamic>.from(payload.first);
-    }
-
-    final merged = <String, dynamic>{};
-    merged.addAll(data);
-    serverMap.forEach((k, v) {
-      if (v != null && v.toString().isNotEmpty) merged[k] = v;
-    });
-
-    if ((merged['content'] == null ||
-            merged['content'].toString().trim().isEmpty) &&
-        serverMap.isNotEmpty) {
-      merged['content'] =
-          serverMap['text'] ??
-          serverMap['body'] ??
-          serverMap['phrase'] ??
-          merged['content'];
-    }
-
-    return merged;
-  }
-
-  Future<void> deletePhrase(String id, {String? bearerToken}) async {
-    final options = Options(headers: {});
-    if (bearerToken != null && bearerToken.isNotEmpty) {
-      options.headers!['Authorization'] = 'Bearer $bearerToken';
-    }
-
-    await _dio.delete('/deletePhrase/$id', options: options);
   }
 
   Future<Map<String, dynamic>> checkServerHealth() async {
@@ -366,5 +220,132 @@ class ApiService {
     }
   }
 
+  // ---- Device configuration ----
+
+  Future<DeviceConfig?> fetchDeviceConfig(String deviceToken) async {
+    try {
+      final response =
+          await _dio.get('${ApiConfig.getDeviceConfigPath}/$deviceToken');
+      if (response.statusCode == 200 && response.data is Map) {
+        return DeviceConfig.fromJson(
+          Map<String, dynamic>.from(response.data),
+        );
+      }
+      return null;
+    } catch (e) {
+      print('fetchDeviceConfig error: $e');
+      return null;
+    }
+  }
+
+  Future<bool> setLocation(String deviceToken, String location) async {
+    try {
+      final response = await _dio.post(
+        ApiConfig.setLocationPath,
+        data: {'token': deviceToken, 'location': location},
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      print('setLocation error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> clearLocation(String deviceToken) async {
+    try {
+      final response = await _dio.post(
+        ApiConfig.clearLocationPath,
+        data: {'token': deviceToken},
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      print('clearLocation error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> setStop(String deviceToken, int stopId) async {
+    try {
+      final response = await _dio.post(
+        ApiConfig.setStopPath,
+        data: {'token': deviceToken, 'stop_id': stopId},
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      print('setStop error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> clearStop(String deviceToken) async {
+    try {
+      final response = await _dio.post(
+        ApiConfig.clearStopPath,
+        data: {'token': deviceToken},
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      print('clearStop error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> addBus(String deviceToken, int busId) async {
+    try {
+      final response = await _dio.post(
+        ApiConfig.addBusPath,
+        data: {'token': deviceToken, 'bus_id': busId},
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      print('addBus error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> removeBus(String deviceToken, int busId) async {
+    try {
+      final response = await _dio.post(
+        ApiConfig.removeBusPath,
+        data: {'token': deviceToken, 'bus_id': busId},
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      print('removeBus error: $e');
+      return false;
+    }
+  }
+
+  // ---- Bus lookup (pickers) ----
+
+  Future<List<BusStop>> fetchStops() async {
+    try {
+      final response = await _dio.get(ApiConfig.getStopsPath);
+      if (response.statusCode == 200 && response.data is List) {
+        return (response.data as List)
+            .map((e) => BusStop.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+      return [];
+    } catch (e) {
+      print('fetchStops error: $e');
+      return [];
+    }
+  }
+
+  Future<List<BusRoute>> fetchRoutes() async {
+    try {
+      final response = await _dio.get(ApiConfig.getRoutesPath);
+      if (response.statusCode == 200 && response.data is List) {
+        return (response.data as List)
+            .map((e) => BusRoute.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+      return [];
+    } catch (e) {
+      print('fetchRoutes error: $e');
+      return [];
+    }
+  }
 }
 

@@ -18,7 +18,20 @@ class _DeviceListPageState extends State<DeviceListPage> {
   void initState() {
     super.initState();
     _sdrumos = AuthService().sdrumos;
+    AuthService().addListener(_onSdrumosChanged);
     _loadDevices();
+  }
+
+  @override
+  void dispose() {
+    AuthService().removeListener(_onSdrumosChanged);
+    super.dispose();
+  }
+
+  void _onSdrumosChanged() {
+    if (mounted) {
+      setState(() => _sdrumos = AuthService().sdrumos);
+    }
   }
 
   Future<void> _loadDevices() async {
@@ -73,14 +86,7 @@ class _DeviceListPageState extends State<DeviceListPage> {
       ),
     );
 
-    tokenController.dispose();
-
     if (token == null || token.isEmpty) return;
-
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Pairing device...')),
-    );
 
     final success = await ApiService().pairDevice(token);
 
