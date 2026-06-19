@@ -20,7 +20,23 @@ def classify_cloud_cover(cloud_cover):
         return 'mostly cloudy'
     return 'overcast'
 
-def classify_hour_weather(cloud_cover, rain, showers, snowfall):
+def classify_weather_code(weather_code):
+    # WMO weather codes: 45/48 = fog, 95/96/99 = thunderstorm
+    try:
+        code = int(weather_code)
+    except (TypeError, ValueError):
+        return None
+    if code in (45, 48):
+        return 'fog'
+    if code in (95, 96, 99):
+        return 'storm'
+    return None
+
+def classify_hour_weather(cloud_cover, rain, showers, snowfall, weather_code=None):
+    coded = classify_weather_code(weather_code)
+    if coded:
+        return coded
+
     cloud = float(cloud_cover or 0)
     rain_val = float(rain or 0)
     showers_val = float(showers or 0)
@@ -60,13 +76,31 @@ _ICON_MAP = {
     'rainy':        'rainy',
     'showers':      'rainy',
     'snowfall':     'snow',
+    'storm':        'storm',
+    'fog':          'fog',
+}
+
+_ICON_NUM = {
+    'sunny':         1,
+    'partly_cloudy': 2,
+    'cloudy':        3,
+    'rainy':         4,
+    'storm':         5,
+    'snow':          6,
+    'fog':           7,
 }
 
 def weather_icon(label):
-    return _ICON_MAP.get(label, 'sunny')
+    icon = _ICON_MAP.get(label, 'sunny')
+    return _ICON_NUM.get(icon, 1)
+
+_DISPLAY_MAP = {
+    'mostly sunny':  'Sunny',
+    'partly cloudy': 'Cloudy',
+}
 
 def weather_display(label):
-    return label.title()
+    return _DISPLAY_MAP.get(label, label.title())
 
 @bp.route('/getWeather/<token>', methods=['GET'])
 def get_weather(token):
@@ -85,12 +119,12 @@ def get_weather(token):
     params = {
         'latitude': row['location_latitude'],
         'longitude': row['location_longitude'],
-        'hourly': 'temperature_2m,rain,showers,snowfall,cloud_cover,relative_humidity_2m,precipitation_probability',
+        'hourly': 'temperature_2m,rain,showers,snowfall,cloud_cover,relative_humidity_2m,precipitation_probability,weather_code',
         'models': 'italia_meteo_arpae_icon_2i',
         'current_weather': 'true',
         'timezone': 'Europe/Berlin',
         'forecast_days': 4,
-        'daily': 'temperature_2m_max,rain_sum,showers_sum,snowfall_sum'
+        'daily': 'temperature_2m_max,rain_sum,showers_sum,snowfall_sum,weather_code'
     }
 
     try:
@@ -114,6 +148,7 @@ def get_weather(token):
             safe_hourly('rain', current_idx),
             safe_hourly('showers', current_idx),
             safe_hourly('snowfall', current_idx),
+            safe_hourly('weather_code', current_idx),
         )
 
         current_dt = datetime.strptime(current_time, '%Y-%m-%dT%H:%M')
@@ -132,6 +167,10 @@ def get_weather(token):
         daily_max_by_date = {}
         for date, max_t in zip(daily_data.get('time', []), daily_data.get('temperature_2m_max', [])):
             daily_max_by_date[date] = max_t
+
+        daily_code_by_date = {}
+        for date, code in zip(daily_data.get('time', []), daily_data.get('weather_code', [])):
+            daily_code_by_date[date] = code
 
         # compute per-day averages from hourly, excluding today
         today_date = hourly_times[0].split('T')[0] if hourly_times else None
@@ -163,6 +202,7 @@ def get_weather(token):
                 day_avg('rain'),
                 day_avg('showers'),
                 day_avg('snowfall'),
+                daily_code_by_date.get(date_key),
             )
             max_t = daily_max_by_date.get(date_key)
             temp = round(max_t) if max_t is not None else round(day_avg('temperature_2m'))
