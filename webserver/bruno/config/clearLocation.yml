@@ -1,18 +1,16 @@
 info:
-  name: register
+  name: clearLocation
   type: http
-  seq: 1
+  seq: 8
 
 http:
   method: POST
-  url: 127.0.0.1:5000/api/user/auth/register
+  url: 127.0.0.1:5000/api/config/clearLocation
   body:
     type: json
     data: |-
       {
-        "username" : "celli",
-        "email" : "celli@example.com",
-        "password" : "celli"
+        "token" : "navy-senior-5934"
       }
   auth: inherit
 
