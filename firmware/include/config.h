@@ -19,6 +19,7 @@
 #include "freertos/semphr.h"
 #include "nvs.h"
 #include "result.h"
+#include "mutex_lock.h"
 
 class Config {
   public:
@@ -78,21 +79,6 @@ class Config {
     ~Config(void);
 
     static bool is_valid_ssid(const char *s, std::size_t len);
-
-    class Lock {
-      public:
-        explicit Lock(SemaphoreHandle_t m) : m_(m) {
-            if (m_) xSemaphoreTake(m_, portMAX_DELAY);
-        }
-        ~Lock() {
-            if (m_) xSemaphoreGive(m_);
-        }
-        Lock(const Lock &) = delete;
-        Lock &operator=(const Lock &) = delete;
-
-      private:
-        SemaphoreHandle_t m_;
-    };
 };
 
 #endif /*! CONFIG_H */

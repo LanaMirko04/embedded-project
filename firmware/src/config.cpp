@@ -43,27 +43,27 @@ Config &Config::get_instance(void) {
 }
 
 const char *Config::get_ssid(void) {
-    Lock lk(this->mutex);
+    MutexLock lk(this->mutex);
     return this->ssid;
 }
 
 const char *Config::get_password(void) {
-    Lock lk(this->mutex);
+    MutexLock lk(this->mutex);
     return this->password;
 }
 
 std::uint32_t Config::get_schema_ver(void) {
-    Lock lk(this->mutex);
+    MutexLock lk(this->mutex);
     return this->schema_ver;
 }
 
 std::uint32_t Config::get_cfg_rev(void) {
-    Lock lk(this->mutex);
+    MutexLock lk(this->mutex);
     return this->cfg_rev;
 }
 
 const char *Config::get_device_token(void) {
-    Lock lk(this->mutex);
+    MutexLock lk(this->mutex);
     return this->device_token;
 }
 
@@ -72,7 +72,7 @@ Result Config::set_device_token(std::string_view token) {
         result_set_err_msg("device token too long (%zu >= %zu)", token.size(), Config::DEVICE_TOKEN_SIZE);
         return Result::INVALID_ARGUMENT;
     }
-    Lock lk(this->mutex);
+    MutexLock lk(this->mutex);
     memset(this->device_token, 0, Config::DEVICE_TOKEN_SIZE);
     memcpy(this->device_token, token.data(), token.size());
     this->dirty = true;
@@ -102,7 +102,7 @@ Result Config::set_ssid(const char *new_ssid, std::size_t len) {
         return Result::INVALID_ARGUMENT;
     }
 
-    Lock lk(this->mutex);
+    MutexLock lk(this->mutex);
     memset(this->ssid, 0, Config::SSID_SIZE);
     memcpy(this->ssid, new_ssid, len);
     this->dirty = true;
@@ -123,7 +123,7 @@ Result Config::set_password(const char *new_password, std::size_t len) {
         return Result::INVALID_ARGUMENT;
     }
 
-    Lock lk(this->mutex);
+    MutexLock lk(this->mutex);
     memset(this->password, 0, Config::PASSWORD_SIZE);
     memcpy(this->password, new_password, len);
     this->dirty = true;
@@ -148,7 +148,7 @@ Result Config::set_credentials(std::string_view new_ssid, std::string_view new_p
         return Result::INVALID_ARGUMENT;
     }
 
-    Lock lk(this->mutex);
+    MutexLock lk(this->mutex);
     memset(this->ssid, 0, Config::SSID_SIZE);
     memcpy(this->ssid, new_ssid.data(), new_ssid.size());
     memset(this->password, 0, Config::PASSWORD_SIZE);
@@ -158,7 +158,7 @@ Result Config::set_credentials(std::string_view new_ssid, std::string_view new_p
 }
 
 void Config::set_schema_ver(std::uint32_t v) {
-    Lock lk(this->mutex);
+    MutexLock lk(this->mutex);
     if (this->schema_ver != v) {
         this->schema_ver = v;
         this->dirty = true;
@@ -166,7 +166,7 @@ void Config::set_schema_ver(std::uint32_t v) {
 }
 
 void Config::set_cfg_rev(std::uint32_t v) {
-    Lock lk(this->mutex);
+    MutexLock lk(this->mutex);
     if (this->cfg_rev != v) {
         this->cfg_rev = v;
         this->dirty = true;
@@ -196,7 +196,7 @@ static Result read_str_field(nvs_handle_t h, const char *key, char *dst, std::si
 }
 
 Result Config::load(void) {
-    Lock lk(this->mutex);
+    MutexLock lk(this->mutex);
 
     NvsHandle nvs;
     NVS_TRY(nvs_open(Config::NVS_NAMESPACE, NVS_READONLY, &nvs.h), "Error opening the storage");
@@ -258,7 +258,7 @@ Result Config::load(void) {
 }
 
 Result Config::store(void) {
-    Lock lk(this->mutex);
+    MutexLock lk(this->mutex);
 
     if (!this->dirty) {
         ESP_LOGD(TAG, "Skip store: clean");
@@ -296,7 +296,7 @@ Result Config::fetch(void) {
 }
 
 Result Config::factory_reset(void) {
-    Lock lk(this->mutex);
+    MutexLock lk(this->mutex);
 
     NvsHandle nvs;
     NVS_TRY(nvs_open(Config::NVS_NAMESPACE, NVS_READWRITE, &nvs.h), "Error opening the storage");
