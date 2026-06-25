@@ -101,7 +101,7 @@ class NetHandler {
     /*!
      * \brief       Private constructor for the singleton.
      */
-    NetHandler() : smartconfig_running(false), connected(false), event_group(nullptr), sta_netif(nullptr), sc_task_handle(nullptr), retry_count(0U) {}
+    NetHandler() : smartconfig_running(false), connected(false), event_group(nullptr), sta_netif(nullptr), sc_task_handle(nullptr), retry_count(0U), came_from_smartconfig(false) {}
 };
 
 #endif /*! NET_H */

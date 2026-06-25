@@ -10,6 +10,14 @@
 #include "utiles.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void ui_load_screen_timer(lv_obj_t *screen);
 
 extern char timer_data[6];
+
+#ifdef __cplusplus
+}
+#endif

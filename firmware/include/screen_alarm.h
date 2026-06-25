@@ -10,6 +10,14 @@
 #include "utiles.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void ui_load_screen_alarm(lv_obj_t *screen);
 
 extern char alarm_data[6];
+
+#ifdef __cplusplus
+}
+#endif

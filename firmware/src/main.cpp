@@ -24,13 +24,11 @@
 #include "result.h"
 #include "config.h"
 
-extern "C" {
 #include "lcd.h"
 #include "touch.h"
 #include "styles.h"
 #include "screen_manager.h"
 #include "utiles.h"
-}
 
 static constexpr char MAIN[] = "MAIN";
 
@@ -57,6 +55,15 @@ static Result init_action(void) {
     ESP_LOGD(MAIN, "Running %s", __func__);
 
     esp_err_t err = nvs_flash_init();
+    if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        ESP_LOGW(MAIN, "NVS needs erase (%s); erasing", esp_err_to_name(err));
+        esp_err_t e2 = nvs_flash_erase();
+        if (e2 != ESP_OK) {
+            ESP_LOGE(MAIN, "NVS erase failed: %s", esp_err_to_name(e2));
+            return Result::UNKNOWN_ERROR;
+        }
+        err = nvs_flash_init();
+    }
     if (err != ESP_OK) {
         ESP_LOGE(MAIN, "NVS init failed: %s", esp_err_to_name(err));
         return Result::UNKNOWN_ERROR;

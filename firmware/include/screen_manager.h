@@ -24,5 +24,13 @@
 #include "ui_navigation.h"
 #include "utiles.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void screen_manager_init(lv_obj_t *screen);
 void ui_load_screen(lv_obj_t *screen);
+
+#ifdef __cplusplus
+}
+#endif

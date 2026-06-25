@@ -23,6 +23,10 @@
  */
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
     char city[32];
     char date[32];
@@ -55,3 +59,7 @@ typedef struct {
 
 
 void ui_load_screen_weather(lv_obj_t *screen);
+
+#ifdef __cplusplus
+}
+#endif

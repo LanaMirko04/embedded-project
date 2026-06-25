@@ -9,5 +9,13 @@
 #include "styles.h"
 #include "utiles.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void ui_load_screen_bus(lv_obj_t *screen);
 void screen_bus_destroy_timer(void);
+
+#ifdef __cplusplus
+}
+#endif

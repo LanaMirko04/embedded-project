@@ -28,6 +28,7 @@
 /*! Standard Library */
 #include <cassert>
 #include <cstring>
+#include <string_view>
 
 constexpr std::size_t NET_SSID_SIZE = 33U;
 constexpr std::size_t NET_PASSWORD_SIZE = 65U;
@@ -36,6 +37,7 @@ constexpr std::size_t NET_SNTP_WAIT_MS = 10000U;
 static const char *NET_TAG = "NET";
 
 void NetHandler::start_smartconfig(void) {
+    ESP_LOGD(NET_TAG, "Now executing %s", __func__);
     if (this->smartconfig_running) {
         return;
     }
@@ -54,8 +56,8 @@ void NetHandler::start_smartconfig(void) {
 void NetHandler::event_handler(void *arg, esp_event_base_t event_base, std::int32_t event_id, void *event_data) {
     ESP_LOGD(NET_TAG, "Now executing %s", __func__);
 
-    NetHandler &net = NetHandler::get_instance();
-    Config &config = Config::get_instance();
+    static NetHandler &net = NetHandler::get_instance();
+    static Config &config = Config::get_instance();
 
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         ESP_LOGI(NET_TAG, "WiFi STA started");
@@ -128,9 +130,15 @@ void NetHandler::event_handler(void *arg, esp_event_base_t event_base, std::int3
         ESP_LOGD(NET_TAG, "SmartConfig SSID: \"%s\"", ssid);
         ESP_LOGD(NET_TAG, "SmartConfig password: \"%s\"", password);
 
-        config.set_ssid(ssid, NET_SSID_SIZE);
-        config.set_password(password, NET_PASSWORD_SIZE);
-        config.store();
+        std::size_t ssid_len = strnlen(ssid, sizeof(ssid) - 1);
+        std::size_t password_len = strnlen(password, sizeof(password) - 1);
+        Result cr = config.set_credentials(std::string_view(ssid, ssid_len),
+                                            std::string_view(password, password_len));
+        if (cr != Result::SUCCESS) {
+            ESP_LOGE(NET_TAG, "set_credentials failed");
+        } else if (config.store() != Result::SUCCESS) {
+            ESP_LOGE(NET_TAG, "Config store failed");
+        }
 
         if (evt->type == SC_TYPE_ESPTOUCH_V2) {
             uint8_t rvd[RVD_DATA_SIZE] = {};

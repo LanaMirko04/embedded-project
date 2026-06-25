@@ -10,4 +10,12 @@
 #include "utiles.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void ui_load_screen_wifi(lv_obj_t *screen);
+
+#ifdef __cplusplus
+}
+#endif

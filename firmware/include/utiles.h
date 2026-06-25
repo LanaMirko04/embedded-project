@@ -3,6 +3,10 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     SCREEN_CLOCK,
     SCREEN_BUS,
@@ -18,4 +22,8 @@ extern bool change_status;
 
 extern Screens present_screen_type;
 extern Screens next_screen_type;
+
+#ifdef __cplusplus
+}
+#endif
 

@@ -11,5 +11,13 @@
 #include "styles.h"
 #include "utiles.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void ui_load_screen_clock(lv_obj_t *screen);
 void screen_clock_destroy(void);
+
+#ifdef __cplusplus
+}
+#endif
