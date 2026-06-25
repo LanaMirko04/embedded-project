@@ -1,0 +1,15 @@
+info:
+  name: getRoute
+  type: http
+  seq: 4
+
+http:
+  method: GET
+  url: 127.0.0.1:5000/api/user/bus/getRoute/1
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
