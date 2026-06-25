@@ -1,0 +1,30 @@
+opencollection: 1.0.0
+
+info:
+  name: sdrumo-api
+config:
+  proxy:
+    inherit: true
+    config:
+      protocol: http
+      hostname: ""
+      port: ""
+      auth:
+        username: ""
+        password: ""
+      bypassProxy: ""
+
+request:
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3MjYxODQxNywianRpIjoiZWU2MGM3MmYtM2FlOC00NjJiLWIzYmEtMjQ2MzkwODAxM2RjIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjEiLCJuYmYiOjE3NzI2MTg0MTcsImNzcmYiOiI1Zjk1NTEzMy0xNGRlLTRjM2UtODFiZS04YzU5MTcyN2VjODIiLCJleHAiOjE3NzI2MTkzMTd9.kJZweJmjoxZ6SkqwGQgD1CeJmVGOeeFOWguGLIMwmE4
+bundled: false
+extensions:
+  bruno:
+    ignore:
+      - node_modules
+      - .git
+    presets:
+      request:
+        type: http
+        url: 127.0.0.1:5000/api
