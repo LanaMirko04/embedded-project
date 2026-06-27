@@ -16,9 +16,29 @@ pip install -r requirements.txt
 
 Python 3.11+ recommended.
 
-## 2. Environment variables
+## 2. Configure environment variables
 
-_TO-DO_
+Create a `.env` file in the `webserver/` directory:
+
+```dotenv
+# Trentino Trasporti API credentials (required)
+TT_BASIC_AUTH_USER=your_tt_username
+TT_BASIC_AUTH_PASS=your_tt_password
+
+# Optional — defaults shown
+TT_BASE_URL=https://app-tpl.tndigit.it/gtlservice/
+
+# JWT signing key (required in production; falls back to Flask SECRET_KEY in dev)
+JWT_SECRET_KEY=change-me-in-production
+
+# Token lifetimes (optional)
+ACCESS_TOKEN_EXPIRES_MINUTES=1000
+REFRESH_TOKEN_EXPIRES_DAYS=30
+```
+
+> [!NOTE]
+> Without `TT_BASIC_AUTH_USER` and `TT_BASIC_AUTH_PASS` the bus trip
+> endpoints return **503** — the server starts but live departures won't work.
 
 ## 3. Initialise the database
 
@@ -36,28 +56,33 @@ This creates `instance/flaskr.sqlite` and seeds the `busses` table from
 ## 4. Run the development server
 
 ```bash
-flask --app flaskr run --host 0.0.0.0 --port 8000
+flask --app flaskr run --host 0.0.0.0
 ```
+
 ## 5. Smoke test
 
 ```bash
-curl http://localhost:8000/api/status/
-# -> {"status":"ok"}
+curl http://localhost:5000/api/status/
+# Response = {"status":"ok"}
 ```
 
 ## 6. API surface (relevant to the firmware)
 
 All routes are mounted under `/api/`.
 
-| Method | Path                                      | Auth     | Used by      |
-|   |  | 
-| GET    | `/api/status/`                            | none     | both         |
-| POST   | `/api/sdrumo/auth/register`               | none     | firmware     |
-| GET    | `/api/sdrumo/bus/getTrips/<token>`        | none     | firmware     |
-| GET    | `/api/sdrumo/weather/getWeather/<token>`  | none     | firmware     |
-| POST   | `/api/user/auth/login` / `/register`      | none/JWT | mobile app   |
-| GET    | `/api/config/get/<token>`                 | JWT      | mobile app   |
-| POST   | `/api/config/pair` / `/unpair` / `/…`     | JWT      | mobile app   |
+| Method | Path | Auth | Used by |
+|--------|------|------|---------|
+| GET | `/api/status/` | none | both |
+| POST | `/api/sdrumo/auth/register` | none | firmware |
+| GET | `/api/sdrumo/bus/getTrips/<token>` | none | firmware |
+| GET | `/api/sdrumo/bus/getTrips/<token>?stop_id=<int>` | none | firmware |
+| GET | `/api/sdrumo/weather/getWeather/<token>` | none | firmware |
+| GET | `/api/sdrumo/config/getConfig/<token>` | none | firmware |
+| POST | `/api/user/auth/login` / `/register` | none/JWT | mobile app |
+| GET | `/api/config/get/<token>` | JWT | mobile app |
+| POST | `/api/config/pair` / `/unpair` / `/…` | JWT | mobile app |
+
+`busColor` in trip responses is a 24-bit integer (`0xRRGGBB`), or `null` if no color is configured for that line.
 
 A [Bruno](https://www.usebruno.com/) collection is provided under
 `webserver/bruno/` for manual testing.

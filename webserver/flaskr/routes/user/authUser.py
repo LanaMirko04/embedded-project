@@ -137,7 +137,16 @@ def refresh():
     return {'access_token': access_token, 'refresh_token': refresh_token}, 200
 
 # User Logout
-@bp.route('/logout')
+@bp.route('/logout', methods=['POST'])
 def logout():
-    session.clear()
-    return redirect(url_for('home'))
+    from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
+    try:
+        verify_jwt_in_request(optional=True)
+        user_id = get_jwt_identity()
+        if user_id:
+            db = get_db()
+            db.execute('UPDATE refresh_tokens SET revoked = 1 WHERE user_id = ?', (user_id,))
+            db.commit()
+    except Exception:
+        pass
+    return {'message': 'Logged out'}, 200

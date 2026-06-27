@@ -12,9 +12,9 @@ def create_app(test_config=None):
     app.config.from_mapping(
         SECRET_KEY='dev',
         DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
-        JWT_SECRET_KEY=os.getenv('JWT_SECRET_KEY'),
-        ACCESS_TOKEN_EXPIRES=timedelta(minutes=int(os.getenv('ACCESS_TOKEN_EXPIRES_MINUTES', 1000))),
-        REFRESH_TOKEN_EXPIRES=timedelta(days=int(os.getenv('REFRESH_TOKEN_EXPIRES_DAYS', 30))),
+        JWT_SECRET_KEY=os.getenv('JWT_SECRET_KEY') or app.config['SECRET_KEY'],
+        JWT_ACCESS_TOKEN_EXPIRES=timedelta(minutes=int(os.getenv('ACCESS_TOKEN_EXPIRES_MINUTES', 1000))),
+        JWT_REFRESH_TOKEN_EXPIRES=timedelta(days=int(os.getenv('REFRESH_TOKEN_EXPIRES_DAYS', 30))),
     )
 
     jwt = JWTManager(app)
@@ -52,6 +52,7 @@ def create_app(test_config=None):
     from .routes import sdrumoConfig
     from .routes.sdrumo import busSdrumo
     from .routes.sdrumo import weatherSdrumo
+    from .routes.sdrumo import configSdrumo
 
     app.register_blueprint(status.bp, url_prefix='/api/status')
 
@@ -64,6 +65,7 @@ def create_app(test_config=None):
     app.register_blueprint(sdrumoConfig.bp, url_prefix='/api/config')
     app.register_blueprint(busSdrumo.bp, url_prefix='/api/sdrumo/bus')
     app.register_blueprint(weatherSdrumo.bp, url_prefix='/api/sdrumo/weather')
+    app.register_blueprint(configSdrumo.bp, url_prefix='/api/sdrumo/config')
 
     return app
 

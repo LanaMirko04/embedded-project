@@ -38,6 +38,12 @@ def get_sdrumo_config(token):
             (sdrumo['id'],)
         ).fetchall()
 
+        stops = db.execute(
+            'SELECT stop_id AS id, stop_name AS name FROM sdrumo_stops '
+            'WHERE sdrumo_id = ? ORDER BY id',
+            (sdrumo['id'],)
+        ).fetchall()
+
         return {
             'id': sdrumo['id'],
             'name': sdrumo['name'],
@@ -46,6 +52,7 @@ def get_sdrumo_config(token):
             'location_latitude': sdrumo['location_latitude'],
             'location_longitude': sdrumo['location_longitude'],
             'stop_id': sdrumo['stop_id'],
+            'stops': [{'id': s['id'], 'name': s['name']} for s in stops],
             'busses': [
                 {
                     'id': bus['id'],
@@ -254,7 +261,7 @@ def set_sdrumo_stop():
         token = data.get('token')
         stop_id = data.get('stop_id')
         
-        if not token or not stop_id:
+        if not token or stop_id is None:
             return {'error': 'Token and stop_id are required'}, 400
         
         user_id = get_jwt_identity()
@@ -316,6 +323,67 @@ def clear_sdrumo_stop():
         return {'error': f'Database error: {str(e)}'}, 500
     except Exception as e:
         return {'error': f'Clearing stop failed: {str(e)}'}, 500
+
+@bp.route('/addStop', methods=['POST'])
+@jwt_required()
+def add_sdrumo_stop():
+    try:
+        data = request.get_json(silent=True) or {}
+        token = data.get('token')
+        stop_id = data.get('stop_id')
+        stop_name = data.get('stop_name', '')
+        if not token or stop_id is None:
+            return {'error': 'token and stop_id required'}, 400
+        user_id = get_jwt_identity()
+        db = get_db()
+        sdrumo = db.execute(
+            'SELECT id FROM sdrumos WHERE token = ? AND user_id = ?',
+            (token, user_id)
+        ).fetchone()
+        if not sdrumo:
+            return {'error': 'Sdrumo not found or not paired'}, 404
+        existing = db.execute(
+            'SELECT id FROM sdrumo_stops WHERE sdrumo_id = ? AND stop_id = ?',
+            (sdrumo['id'], stop_id)
+        ).fetchone()
+        if existing:
+            return {'message': 'Stop already added'}, 200
+        db.execute(
+            'INSERT INTO sdrumo_stops (sdrumo_id, stop_id, stop_name) VALUES (?, ?, ?)',
+            (sdrumo['id'], stop_id, stop_name)
+        )
+        db.commit()
+        updateTimestamp(token)
+        return {'message': 'Stop added'}, 201
+    except sqlite3.Error as e:
+        return {'error': f'Database error: {str(e)}'}, 500
+
+@bp.route('/removeStop', methods=['POST'])
+@jwt_required()
+def remove_sdrumo_stop():
+    try:
+        data = request.get_json(silent=True) or {}
+        token = data.get('token')
+        stop_id = data.get('stop_id')
+        if not token or stop_id is None:
+            return {'error': 'token and stop_id required'}, 400
+        user_id = get_jwt_identity()
+        db = get_db()
+        sdrumo = db.execute(
+            'SELECT id FROM sdrumos WHERE token = ? AND user_id = ?',
+            (token, user_id)
+        ).fetchone()
+        if not sdrumo:
+            return {'error': 'Sdrumo not found or not paired'}, 404
+        db.execute(
+            'DELETE FROM sdrumo_stops WHERE sdrumo_id = ? AND stop_id = ?',
+            (sdrumo['id'], stop_id)
+        )
+        db.commit()
+        updateTimestamp(token)
+        return {'message': 'Stop removed'}, 200
+    except sqlite3.Error as e:
+        return {'error': f'Database error: {str(e)}'}, 500
 
 @bp.route('/addBus', methods=['POST'])
 @jwt_required()

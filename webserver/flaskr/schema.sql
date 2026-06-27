@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS sdrumos;
 DROP TABLE IF EXISTS busses;
 DROP TABLE IF EXISTS sdrumo_busses;
+DROP TABLE IF EXISTS sdrumo_stops;
 DROP TABLE IF EXISTS refresh_tokens;
 
 CREATE TABLE users (
@@ -45,6 +46,15 @@ CREATE TABLE sdrumo_busses (
 
   FOREIGN KEY (sdrumo_id) REFERENCES sdrumos (id) ON DELETE CASCADE,
   FOREIGN KEY (bus_id) REFERENCES busses (id) ON DELETE CASCADE
+);
+
+CREATE TABLE sdrumo_stops (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  sdrumo_id INTEGER NOT NULL,
+  stop_id INTEGER NOT NULL,
+  stop_name TEXT NOT NULL,
+
+  FOREIGN KEY (sdrumo_id) REFERENCES sdrumos (id) ON DELETE CASCADE
 );
 
 CREATE TABLE refresh_tokens (

@@ -15,7 +15,6 @@ from flask import (
 
 bp = Blueprint('busSdrumo', __name__)
 
-# Configuration for Trentino Trasporti API
 tt_base_url = os.getenv('TT_BASE_URL', 'https://app-tpl.tndigit.it/gtlservice/')
 tt_basic_auth = HTTPBasicAuth(os.getenv('TT_BASIC_AUTH_USER'), os.getenv('TT_BASIC_AUTH_PASS'))
 
@@ -37,23 +36,21 @@ def get_color_from_id(bus_id):
         (bus_id,)    ).fetchone()
     if color and color['color']:
         try:
-            return hex_to_rgb(color['color'])
+            return hex_to_int(color['color'])
         except (ValueError, TypeError):
-            # Invalid hex color, return None
             return None
     return None
 
-def hex_to_rgb(hex_color: str):
+def hex_to_int(hex_color: str):
     if not hex_color:
         raise ValueError("Hex color cannot be empty")
     hex_color = hex_color.strip().lstrip("#")
-    if len(hex_color) == 3:  # short form like "f0a"
+    if len(hex_color) == 3:
         hex_color = "".join(c * 2 for c in hex_color)
     if len(hex_color) != 6:
         raise ValueError("Hex color must be 3 or 6 characters long")
-    return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+    return int(hex_color, 16)
 
-# Bus Trips Endpoint
 @bp.route('/getTrips/<int:stopId>', methods=['GET'])
 def get_trips(stopId):
 
@@ -64,9 +61,10 @@ def get_trips(stopId):
         'refDateTime': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
     }
 
-    print(params)
-
-    tt_response = requests.get(tt_base_url + 'trips_new', auth=tt_basic_auth, params=params)
+    try:
+        tt_response = requests.get(tt_base_url + 'trips_new', auth=tt_basic_auth, params=params)
+    except requests.RequestException as e:
+        return {'error': f'Transit API unreachable: {str(e)}'}, 503
 
     if tt_response.status_code == 200:
         response = []
@@ -82,37 +80,53 @@ def get_trips(stopId):
             })
         return response, 200
     else:
-        return {'error': 'Failed to fetch trips'}, tt_response.status_code
+        return {'error': 'Failed to fetch trips'}, 503
 
 @bp.route('/getTrips/<string:sdrumo_token>', methods=['GET'])
 def get_sdrumo_trips(sdrumo_token):
-    sdrumo_id = get_db().execute(
+    from flask import request as req
+    db = get_db()
+    sdrumo_id = db.execute(
         'SELECT id FROM sdrumos WHERE token = ?',
         (sdrumo_token,)
     ).fetchone()
     if not sdrumo_id:
         return {'error': 'Sdrumo not found'}, 404
 
-    db = get_db()
     bus_ids = db.execute(
         'SELECT bus_id FROM sdrumo_busses WHERE sdrumo_id = ?',
         (sdrumo_id['id'],)
     ).fetchall()
 
     if not bus_ids:
-        return {'error': 'Sdrumo not found'}, 404
+        return [], 200
 
-    stop_id = db.execute(
-        'SELECT stop_id FROM sdrumos WHERE token = ?',
-        (sdrumo_token,)
-    ).fetchone()['stop_id']
+    override_stop = req.args.get('stop_id', type=int)
+    if override_stop is not None:
+        stop_id = override_stop
+    else:
+        stop_row = db.execute(
+            'SELECT stop_id FROM sdrumos WHERE token = ?',
+            (sdrumo_token,)
+        ).fetchone()
+        stop_id = stop_row['stop_id'] if stop_row else None
+
+        if stop_id is None:
+            first = db.execute(
+                'SELECT stop_id FROM sdrumo_stops WHERE sdrumo_id = ? ORDER BY id LIMIT 1',
+                (sdrumo_id['id'],)
+            ).fetchone()
+            stop_id = first['stop_id'] if first else None
+
+    if stop_id is None:
+        return [], 200
 
     trips = get_trips(stop_id)
-    filtered_trips = []
-    for trip in trips[0]:  # trips is a tuple (response, status_code
-        if any(trip['busId'] == bus_id['bus_id'] for bus_id in bus_ids):
-            filtered_trips.append(trip)
-    if filtered_trips:
-        return filtered_trips, 200
-        
-    return {'error': 'No trips found for this Sdrumo'}, 404
+    if trips[1] != 200:
+        return {'error': 'Transit API unavailable'}, 503
+
+    filtered_trips = [
+        trip for trip in trips[0]
+        if any(trip['busId'] == bus_id['bus_id'] for bus_id in bus_ids)
+    ]
+    return filtered_trips, 200

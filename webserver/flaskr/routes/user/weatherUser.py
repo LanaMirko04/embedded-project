@@ -28,11 +28,13 @@ def get_location():
 @bp.route('/clearLocation', methods=['POST'])
 @jwt_required()
 def clear_location():
-    db = get_db()
-    db.execute(
-        'UPDATE users SET location = NULL, location_latitude = NULL, location_longitude = NULL WHERE id = ?',
-        (get_jwt_identity(),)
-    )
-    db.commit()
-    
-    return {'message': 'Location cleared successfully'}, 200
+    try:
+        db = get_db()
+        db.execute(
+            'UPDATE users SET location = NULL, location_latitude = NULL, location_longitude = NULL WHERE id = ?',
+            (get_jwt_identity(),)
+        )
+        db.commit()
+        return {'message': 'Location cleared successfully'}, 200
+    except Exception as e:
+        return {'error': f'Database error: {str(e)}'}, 500

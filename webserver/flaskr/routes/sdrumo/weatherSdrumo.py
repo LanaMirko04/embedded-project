@@ -136,7 +136,10 @@ def get_weather(token):
         hourly = data.get('hourly', {})
         hourly_times = hourly.get('time', [])
 
-        current_time = data['current_weather']['time']
+        current_weather = data.get('current_weather')
+        if not current_weather:
+            return {'error': 'Weather API response missing current_weather'}, 502
+        current_time = current_weather['time']
         current_idx = get_current_hour_index(current_time, hourly_times)
 
         def safe_hourly(key, idx):
@@ -156,10 +159,10 @@ def get_weather(token):
             'date': current_dt.strftime('%a %d %b'),
             'weather': weather_display(current_weather_label),
             'weather_icon': weather_icon(current_weather_label),
-            'temperature': round(data['current_weather']['temperature']),
+            'temperature': round(current_weather.get('temperature', 0)),
             'rain_probability': round(safe_hourly('precipitation_probability', current_idx)),
             'humidity': round(safe_hourly('relative_humidity_2m', current_idx)),
-            'wind_speed': round(data['current_weather']['windspeed']),
+            'wind_speed': round(current_weather.get('windspeed', 0)),
         }
 
         # daily max temps by date (for forecast temperature)

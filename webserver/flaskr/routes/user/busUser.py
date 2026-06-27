@@ -26,7 +26,10 @@ tt_basic_auth = HTTPBasicAuth(os.getenv('TT_BASIC_AUTH_USER'), os.getenv('TT_BAS
 @bp.route('/getStops', methods=['GET'])
 def get_stops():
     params = {'type': 'U'}
-    tt_response = requests.get(tt_base_url + 'stops', auth=tt_basic_auth, params=params)
+    try:
+        tt_response = requests.get(tt_base_url + 'stops', auth=tt_basic_auth, params=params)
+    except requests.RequestException as e:
+        return {'error': f'Transit API unreachable: {str(e)}'}, 503
     if tt_response.status_code == 200:
         response = []
         for stop in tt_response.json():
@@ -36,12 +39,15 @@ def get_stops():
             response.append({'id': stop['stopId'], 'name': stop['stopName'], 'position': {'lat': stop['stopLat'], 'lon': stop['stopLon']}, 'busses': busList})
         return response, 200
     else:
-        return {'error': 'Failed to fetch stops'}, tt_response.status_code
-    
+        return {'error': 'Failed to fetch stops'}, 502
+
 @bp.route('/getStop/<int:stop_id>', methods=['GET'])
 def get_stop(stop_id):
     params = {'type': 'U'}
-    tt_response = requests.get(tt_base_url + 'stops', auth=tt_basic_auth, params=params)
+    try:
+        tt_response = requests.get(tt_base_url + 'stops', auth=tt_basic_auth, params=params)
+    except requests.RequestException as e:
+        return {'error': f'Transit API unreachable: {str(e)}'}, 503
     if tt_response.status_code == 200:
         for stop in tt_response.json():
             if stop['stopId'] == stop_id:
@@ -52,7 +58,7 @@ def get_stop(stop_id):
                 return response, 200
         return {'error': 'Stop not found'}, 404
     else:
-        return {'error': 'Failed to fetch stops'}, tt_response.status_code
+        return {'error': 'Failed to fetch stops'}, 502
 
 # Bus Routes endpoint
 @bp.route('/getRoutes', methods=['GET'])
