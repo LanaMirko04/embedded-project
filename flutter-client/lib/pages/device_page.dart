@@ -25,9 +25,7 @@ class _DevicePageState extends State<DevicePage> {
 
   DeviceConfig? _config;
   bool _loadingConfig = true;
-  bool _busy = false; // a config mutation is in flight
-  // Name of the currently selected stop, kept locally (server returns only id).
-  String? _stopName;
+  bool _busy = false;
 
   String? get _token => widget.device.token;
 
@@ -209,30 +207,30 @@ class _DevicePageState extends State<DevicePage> {
     );
   }
 
-  // ---- Bus stop ----
+  // ---- Bus stops ----
 
-  Future<void> _pickStop() async {
+  Future<void> _addStop() async {
     final token = _token;
     if (token == null) return;
+    final existing = (_config?.stops ?? []).map((s) => s.id).toSet();
     final stop = await Navigator.push<BusStop>(
       context,
       MaterialPageRoute(builder: (_) => const StopPickerPage()),
     );
     if (stop == null) return;
-    _stopName = stop.name;
+    if (existing.contains(stop.id)) return;
     await _runMutation(
-      () => ApiService().setStop(token, stop.id),
-      'Failed to set stop',
+      () => ApiService().addStop(token, stop.id, stop.name),
+      'Failed to add stop',
     );
   }
 
-  Future<void> _clearStop() async {
+  Future<void> _removeStop(BusStop stop) async {
     final token = _token;
     if (token == null) return;
-    _stopName = null;
     await _runMutation(
-      () => ApiService().clearStop(token),
-      'Failed to clear stop',
+      () => ApiService().removeStop(token, stop.id),
+      'Failed to remove stop',
     );
   }
 
@@ -334,7 +332,7 @@ class _DevicePageState extends State<DevicePage> {
                     ),
                   _buildLocationCard(),
                   const SizedBox(height: 12),
-                  _buildStopCard(),
+                  _buildStopsCard(),
                   const SizedBox(height: 12),
                   _buildBusLinesCard(),
                 ],
@@ -382,11 +380,8 @@ class _DevicePageState extends State<DevicePage> {
     );
   }
 
-  Widget _buildStopCard() {
-    final stopId = _config?.stopId;
-    final label = stopId == null
-        ? 'Not set'
-        : (_stopName != null ? '$_stopName (#$stopId)' : 'Stop #$stopId');
+  Widget _buildStopsCard() {
+    final stops = _config?.stops ?? [];
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -397,27 +392,29 @@ class _DevicePageState extends State<DevicePage> {
               children: [
                 const Icon(Icons.directions_bus_outlined),
                 const SizedBox(width: 8),
-                Text('Bus Stop', style: Theme.of(context).textTheme.titleMedium),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(label),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                TextButton.icon(
-                  onPressed: _busy ? null : _pickStop,
-                  icon: const Icon(Icons.edit),
-                  label: Text(stopId == null ? 'Select' : 'Change'),
+                Text('Bus Stops', style: Theme.of(context).textTheme.titleMedium),
+                const Spacer(),
+                IconButton(
+                  onPressed: _busy ? null : _addStop,
+                  icon: const Icon(Icons.add),
+                  tooltip: 'Add stop',
                 ),
-                if (stopId != null)
-                  TextButton.icon(
-                    onPressed: _busy ? null : _clearStop,
-                    icon: const Icon(Icons.clear),
-                    label: const Text('Clear'),
-                  ),
               ],
             ),
+            const SizedBox(height: 8),
+            if (stops.isEmpty)
+              const Text('No stops added')
+            else
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: stops.map((stop) {
+                  return Chip(
+                    label: Text(stop.name),
+                    onDeleted: _busy ? null : () => _removeStop(stop),
+                  );
+                }).toList(),
+              ),
           ],
         ),
       ),
