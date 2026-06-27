@@ -1,4 +1,5 @@
 import 'bus_route.dart';
+import 'bus_stop.dart';
 
 class DeviceConfig {
   final int id;
@@ -7,7 +8,7 @@ class DeviceConfig {
   final String? location;
   final double? latitude;
   final double? longitude;
-  final int? stopId;
+  final List<BusStop> stops;
   final List<BusRoute> busses;
 
   DeviceConfig({
@@ -17,12 +18,13 @@ class DeviceConfig {
     this.location,
     this.latitude,
     this.longitude,
-    this.stopId,
+    this.stops = const [],
     this.busses = const [],
   });
 
   factory DeviceConfig.fromJson(Map<String, dynamic> json) {
     final rawBusses = json['busses'];
+    final rawStops = json['stops'];
     return DeviceConfig(
       id: json['id'] as int,
       name: (json['name'] ?? '').toString(),
@@ -30,7 +32,11 @@ class DeviceConfig {
       location: json['location']?.toString(),
       latitude: (json['location_latitude'] as num?)?.toDouble(),
       longitude: (json['location_longitude'] as num?)?.toDouble(),
-      stopId: json['stop_id'] as int?,
+      stops: rawStops is List
+          ? rawStops
+              .map((e) => BusStop.fromJson(e as Map<String, dynamic>))
+              .toList()
+          : const [],
       busses: rawBusses is List
           ? rawBusses
               .map((e) => BusRoute.fromJson(e as Map<String, dynamic>))

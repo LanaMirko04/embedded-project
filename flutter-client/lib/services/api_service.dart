@@ -29,8 +29,14 @@ class ApiService {
           final status = error.response?.statusCode;
           final alreadyRetried = error.requestOptions.extra['retried'] == true;
 
-          // Only attempt refresh on 401 and if we haven't retried this request yet
-          if (status == 401 && !alreadyRetried) {
+          // 422 from Flask-JWT-Extended = token present but unverifiable (wrong secret, malformed)
+          final is422JwtError = status == 422 &&
+              error.response?.data is Map &&
+              (error.response!.data as Map)['msg'] != null &&
+              (error.response!.data as Map)['error'] == null;
+
+          // Only attempt refresh on 401/422-jwt and if we haven't retried this request yet
+          if ((status == 401 || is422JwtError) && !alreadyRetried) {
             print('Got 401 error, attempting token refresh...');
             try {
               // If another refresh is in progress, wait for it instead of starting a new one
@@ -205,18 +211,31 @@ class ApiService {
     }
   }
 
-  Future<bool> pairDevice(String deviceToken) async {
+  /// Returns null on success, error message string on failure.
+  Future<String?> pairDevice(String deviceToken) async {
     try {
       final response = await _dio.post(
         ApiConfig.pairDevicePath,
-        data: {
-          'token': deviceToken,
-        },
+        data: {'token': deviceToken},
       );
-      return response.statusCode == 200;
+      if (response.statusCode == 200) return null;
+      final data = response.data;
+      if (data is Map) {
+        return (data['error'] ?? data['msg'])?.toString() ??
+            'Failed to pair device (${response.statusCode})';
+      }
+      return 'Failed to pair device (${response.statusCode})';
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      if (data is Map) {
+        return (data['error'] ?? data['msg'])?.toString() ??
+            'Failed to pair device (${e.response?.statusCode})';
+      }
+      print('pairDevice error: $e');
+      return 'Network error';
     } catch (e) {
       print('pairDevice error: $e');
-      return false;
+      return 'Network error';
     }
   }
 
@@ -264,28 +283,28 @@ class ApiService {
     }
   }
 
-  Future<bool> setStop(String deviceToken, int stopId) async {
+  Future<bool> addStop(String deviceToken, int stopId, String stopName) async {
     try {
       final response = await _dio.post(
-        ApiConfig.setStopPath,
-        data: {'token': deviceToken, 'stop_id': stopId},
+        ApiConfig.addStopPath,
+        data: {'token': deviceToken, 'stop_id': stopId, 'stop_name': stopName},
       );
-      return response.statusCode == 200;
+      return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) {
-      print('setStop error: $e');
+      print('addStop error: $e');
       return false;
     }
   }
 
-  Future<bool> clearStop(String deviceToken) async {
+  Future<bool> removeStop(String deviceToken, int stopId) async {
     try {
       final response = await _dio.post(
-        ApiConfig.clearStopPath,
-        data: {'token': deviceToken},
+        ApiConfig.removeStopPath,
+        data: {'token': deviceToken, 'stop_id': stopId},
       );
       return response.statusCode == 200;
     } catch (e) {
-      print('clearStop error: $e');
+      print('removeStop error: $e');
       return false;
     }
   }
@@ -318,7 +337,7 @@ class ApiService {
 
   // ---- Bus lookup (pickers) ----
 
-  Future<List<BusStop>> fetchStops() async {
+  Future<List<BusStop>?> fetchStops() async {
     try {
       final response = await _dio.get(ApiConfig.getStopsPath);
       if (response.statusCode == 200 && response.data is List) {
@@ -326,10 +345,10 @@ class ApiService {
             .map((e) => BusStop.fromJson(e as Map<String, dynamic>))
             .toList();
       }
-      return [];
+      return null;
     } catch (e) {
       print('fetchStops error: $e');
-      return [];
+      return null;
     }
   }
 
