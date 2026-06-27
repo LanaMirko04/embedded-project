@@ -74,7 +74,6 @@ class _RoutePickerPageState extends State<RoutePickerPage> {
               decoration: const InputDecoration(
                 prefixIcon: Icon(Icons.search),
                 hintText: 'Search by line number or name',
-                border: OutlineInputBorder(),
               ),
             ),
           ),

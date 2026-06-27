@@ -104,6 +104,11 @@ class _DevicePageState extends State<DevicePage> {
         _deviceName = newName;
         _isEditing = false;
       });
+      // Keep the global device list in sync so the change survives navigating
+      // back to the list and re-opening this page (which rebuilds from it).
+      final freshDevices = await ApiService().fetchSdrumos() ?? [];
+      AuthService().setSdrumos(freshDevices);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Device name updated')),
       );
@@ -135,7 +140,10 @@ class _DevicePageState extends State<DevicePage> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Remove', style: TextStyle(color: Colors.red)),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Remove'),
           ),
         ],
       ),
@@ -291,10 +299,7 @@ class _DevicePageState extends State<DevicePage> {
                   ? const SizedBox(
                       width: 24,
                       height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
+                      child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : IconButton(
                       icon: const Icon(Icons.check),
@@ -353,7 +358,8 @@ class _DevicePageState extends State<DevicePage> {
           children: [
             Row(
               children: [
-                const Icon(Icons.location_on_outlined),
+                Icon(Icons.location_on_outlined,
+                    color: Theme.of(context).colorScheme.primary),
                 const SizedBox(width: 8),
                 Text('Location', style: Theme.of(context).textTheme.titleMedium),
               ],
@@ -395,7 +401,8 @@ class _DevicePageState extends State<DevicePage> {
           children: [
             Row(
               children: [
-                const Icon(Icons.directions_bus_outlined),
+                Icon(Icons.directions_bus_outlined,
+                    color: Theme.of(context).colorScheme.primary),
                 const SizedBox(width: 8),
                 Text('Bus Stop', style: Theme.of(context).textTheme.titleMedium),
               ],
@@ -434,7 +441,8 @@ class _DevicePageState extends State<DevicePage> {
           children: [
             Row(
               children: [
-                const Icon(Icons.route_outlined),
+                Icon(Icons.route_outlined,
+                    color: Theme.of(context).colorScheme.primary),
                 const SizedBox(width: 8),
                 Text('Bus Lines', style: Theme.of(context).textTheme.titleMedium),
                 const Spacer(),
