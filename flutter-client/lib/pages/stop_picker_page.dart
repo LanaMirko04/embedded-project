@@ -74,7 +74,6 @@ class _StopPickerPageState extends State<StopPickerPage> {
               decoration: const InputDecoration(
                 prefixIcon: Icon(Icons.search),
                 hintText: 'Search by stop name or line',
-                border: OutlineInputBorder(),
               ),
             ),
           ),
