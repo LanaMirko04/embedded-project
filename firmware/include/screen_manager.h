@@ -21,6 +21,7 @@
 #include "screen_weather.h"
 #include "screen_alarm.h"
 #include "screen_timer.h"
+#include "screen_pairing.h"
 #include "ui_navigation.h"
 #include "utiles.h"
 

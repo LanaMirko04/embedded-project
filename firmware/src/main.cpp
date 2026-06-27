@@ -18,11 +18,13 @@
 #include <cstring>
 #include <nvs.h>
 
+#include "api_client.h"
+#include "api_task.h"
+#include "config.h"
 #include "fsm.h"
 #include "net.h"
 #include "nvs_flash.h"
 #include "result.h"
-#include "config.h"
 
 #include "lcd.h"
 #include "touch.h"
@@ -33,6 +35,7 @@
 static constexpr char MAIN[] = "MAIN";
 
 static bool lvgl_initialized = false;
+static bool s_first_boot     = false;
 
 static esp_lcd_panel_io_handle_t s_lcd_io;
 static esp_lcd_panel_handle_t s_lcd_panel;
@@ -156,13 +159,32 @@ static Result wifi_connection_action(void) {
 
 static Result fetch_config_action(void) {
     ESP_LOGD(MAIN, "Running %s", __func__);
-    /* TODO: fetch remote configuration */
+
+    Config    &cfg = Config::get_instance();
+    ApiClient &api = ApiClient::get_instance();
+
+    if (cfg.get_device_token()[0] == '\0') {
+        ESP_LOGI(MAIN, "No device token — registering device");
+        Result r = api.register_device();
+        if (r != Result::SUCCESS) {
+            result_set_err_msg("Device registration failed: %s", result_to_str(r));
+            return r;
+        }
+        ESP_LOGI(MAIN, "Registered: token=%s", cfg.get_device_token());
+        s_first_boot = true;
+    } else {
+        ESP_LOGI(MAIN, "Device token present: %s", cfg.get_device_token());
+    }
+
+    if (!s_first_boot) {
+        api_task_start();
+    }
     return Result::SUCCESS;
 }
 
 static Result update_view_action(void) {
     ESP_LOGD(MAIN, "Running %s", __func__);
-    next_screen_type = SCREEN_CLOCK;
+    next_screen_type = s_first_boot ? SCREEN_PAIRING : SCREEN_CLOCK;
     return Result::SUCCESS;
 }
 

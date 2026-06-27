@@ -16,6 +16,7 @@ typedef enum {
     SCREEN_WIFI,
     SCREEN_ALARM,
     SCREEN_TIMER,
+    SCREEN_PAIRING,
 } Screens;
 
 extern bool change_status;

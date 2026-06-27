@@ -172,7 +172,7 @@ void NetHandler::smartconfig_task(void *args) {
     EventBits_t bits;
     NetHandler &net_handler = NetHandler::get_instance();
 
-    ESP_ERROR_CHECK(esp_smartconfig_set_type(SC_TYPE_ESPTOUCH));
+    ESP_ERROR_CHECK(esp_smartconfig_set_type(SC_TYPE_ESPTOUCH_V2));
     smartconfig_start_config_t cfg = SMARTCONFIG_START_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_smartconfig_start(&cfg));
     while (true) {
@@ -226,8 +226,10 @@ void NetHandler::init_connection(void) {
 
     if (config.get_ssid()[0U] && config.get_password()[0U]) {
         wifi_config_t cfg = {};
-        memcpy(cfg.sta.ssid, config.get_ssid(), NET_SSID_SIZE - 1);
-        memcpy(cfg.sta.password, config.get_password(), NET_PASSWORD_SIZE - 1);
+        memcpy(cfg.sta.ssid, config.get_ssid(), sizeof(cfg.sta.ssid) - 1);
+        cfg.sta.ssid[sizeof(cfg.sta.ssid) - 1] = '\0';
+        memcpy(cfg.sta.password, config.get_password(), sizeof(cfg.sta.password) - 1);
+        cfg.sta.password[sizeof(cfg.sta.password) - 1] = '\0';
         ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &cfg));
     } else {
         ESP_LOGE(NET_TAG, "Failed to load Wi-Fi credentials: %s", result_get_err_msg());
@@ -237,7 +239,10 @@ void NetHandler::init_connection(void) {
 }
 
 Result NetHandler::sync_time(void) {
-    ESP_LOGD(NET_TAG, "Now executing %s", __func__);    
+    ESP_LOGD(NET_TAG, "Now executing %s", __func__);
+
+    setenv("TZ", "CET-1CEST,M3.5.0,M10.5.0/3", 1);
+    tzset();
 
     esp_sntp_config_t config = ESP_NETIF_SNTP_DEFAULT_CONFIG("it.pool.ntp.org");
     esp_netif_sntp_init(&config);

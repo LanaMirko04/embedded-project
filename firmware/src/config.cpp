@@ -173,6 +173,32 @@ void Config::set_cfg_rev(std::uint32_t v) {
     }
 }
 
+int Config::get_stop_id(void) {
+    MutexLock lk(this->mutex);
+    return this->stop_id;
+}
+
+void Config::set_stop_id(int v) {
+    MutexLock lk(this->mutex);
+    if (this->stop_id != v) {
+        this->stop_id = v;
+        this->dirty = true;
+    }
+}
+
+DeviceStopList Config::get_stops(void) {
+    MutexLock lk(this->mutex);
+    return this->stops;
+}
+
+void Config::set_stops(const DeviceStopList &s) {
+    MutexLock lk(this->mutex);
+    if (memcmp(&this->stops, &s, sizeof(DeviceStopList)) != 0) {
+        this->stops = s;
+        this->dirty = true;
+    }
+}
+
 static Result read_str_field(nvs_handle_t h, const char *key, char *dst, std::size_t dst_size) {
     std::size_t required = 0U;
     esp_err_t res = nvs_get_str(h, key, nullptr, &required);
@@ -233,12 +259,34 @@ Result Config::load(void) {
         return Result::IO_ERROR;
     }
 
+    DeviceStopList tmp_stops = {};
+    std::size_t stops_sz = sizeof(DeviceStopList);
+    res = nvs_get_blob(nvs.h, Config::NVS_STOPS_KEY, &tmp_stops, &stops_sz);
+    if (res != ESP_OK && res != ESP_ERR_NVS_NOT_FOUND) {
+        result_set_err_msg("Error (%s) reading stops", esp_err_to_name(res));
+        return Result::IO_ERROR;
+    }
+
+    int32_t tmp_stop_id = 0;
+    res = nvs_get_i32(nvs.h, Config::NVS_STOP_ID_KEY, &tmp_stop_id);
+    if (res != ESP_OK && res != ESP_ERR_NVS_NOT_FOUND) {
+        result_set_err_msg("Error (%s) reading stop_id", esp_err_to_name(res));
+        return Result::IO_ERROR;
+    }
+
     memcpy(this->ssid, tmp_ssid, Config::SSID_SIZE);
     memcpy(this->password, tmp_password, Config::PASSWORD_SIZE);
     memcpy(this->device_token, tmp_device_token, Config::DEVICE_TOKEN_SIZE);
     this->schema_ver = tmp_schema_ver;
-    this->cfg_rev = tmp_cfg_rev;
+    this->cfg_rev    = tmp_cfg_rev;
+    this->stops      = tmp_stops;
+    this->stop_id    = static_cast<int>(tmp_stop_id);
     this->dirty = false;
+
+    ESP_LOGI(TAG, "Config loaded: ssid=%s token=%s schema_ver=%lu",
+             this->ssid,
+             this->device_token[0] ? this->device_token : "(none)",
+             static_cast<unsigned long>(this->schema_ver));
 
     // cppcheck-suppress knownConditionTrueFalse ; intentional: branch activates when CURRENT_SCHEMA_VER bumps
     if (tmp_schema_ver != 0U && tmp_schema_ver < CURRENT_SCHEMA_VER) {
@@ -281,10 +329,17 @@ Result Config::store(void) {
     if (this->cfg_rev != 0U) {
         NVS_TRY(nvs_set_u32(nvs.h, Config::NVS_CFG_REV_KEY, this->cfg_rev), "Error saving cfg_rev");
     }
+    if (this->stops.count > 0) {
+        NVS_TRY(nvs_set_blob(nvs.h, Config::NVS_STOPS_KEY, &this->stops, sizeof(DeviceStopList)), "Error saving stops");
+    }
+    if (this->stop_id != 0) {
+        NVS_TRY(nvs_set_i32(nvs.h, Config::NVS_STOP_ID_KEY, static_cast<int32_t>(this->stop_id)), "Error saving stop_id");
+    }
 
     NVS_TRY(nvs_commit(nvs.h), "Error committing config");
     this->schema_ver = sv;
     this->dirty = false;
+    ESP_LOGI(TAG, "Config stored: ssid=%s token=%s", this->ssid, this->device_token[0] ? this->device_token : "(none)");
 
     return Result::SUCCESS;
 }
@@ -313,7 +368,9 @@ Result Config::factory_reset(void) {
     memset(this->password, 0, Config::PASSWORD_SIZE);
     memset(this->device_token, 0, Config::DEVICE_TOKEN_SIZE);
     this->schema_ver = 0U;
-    this->cfg_rev = 0U;
+    this->cfg_rev    = 0U;
+    this->stop_id    = 0;
+    memset(&this->stops, 0, sizeof(DeviceStopList));
     this->dirty = false;
 
     ESP_LOGW(TAG, "Factory reset done");
@@ -326,7 +383,7 @@ bool Config::is_up_to_date(void) {
 }
 
 Config::Config(void)
-    : schema_ver(0U), cfg_rev(0U), ssid{}, password{}, device_token{}, dirty(false), mutex(xSemaphoreCreateMutex()) {
+    : schema_ver(0U), cfg_rev(0U), stop_id(0), stops{}, ssid{}, password{}, device_token{}, dirty(false), mutex(xSemaphoreCreateMutex()) {
     if (!mutex) {
         ESP_LOGE(TAG, "Mutex creation failed");
     }

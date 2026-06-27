@@ -15,6 +15,8 @@
 #include <cstdint>
 #include <string_view>
 
+#include "bus_model.h"
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 #include "nvs.h"
@@ -23,7 +25,7 @@
 
 class Config {
   public:
-    static constexpr std::uint32_t CURRENT_SCHEMA_VER = 1U;
+    static constexpr std::uint32_t CURRENT_SCHEMA_VER = 2U;
 
     Config(const Config &obj) = delete;
     void operator=(const Config &) = delete;
@@ -35,6 +37,8 @@ class Config {
     const char *get_device_token(void);
     std::uint32_t get_schema_ver(void);
     std::uint32_t get_cfg_rev(void);
+    int           get_stop_id(void);
+    DeviceStopList get_stops(void);
 
     Result set_ssid(const char *ssid, std::size_t len);
     Result set_ssid(std::string_view ssid);
@@ -44,6 +48,8 @@ class Config {
     Result set_device_token(std::string_view token);
     void set_schema_ver(std::uint32_t v);
     void set_cfg_rev(std::uint32_t v);
+    void set_stop_id(int v);
+    void set_stops(const DeviceStopList &stops);
 
     Result load(void);
     Result store(void);
@@ -59,6 +65,8 @@ class Config {
     static constexpr char NVS_NAMESPACE[] = "config";
     static constexpr char NVS_SCHEMA_VER_KEY[] = "schema_ver";
     static constexpr char NVS_CFG_REV_KEY[] = "cfg_rev";
+    static constexpr char NVS_STOP_ID_KEY[]  = "stop_id";
+    static constexpr char NVS_STOPS_KEY[]    = "stops";
     static constexpr char NVS_SSID_KEY[] = "ssid";
     static constexpr char NVS_PASSWORD_KEY[] = "password";
     static constexpr char NVS_DEVICE_TOKEN_KEY[] = "dev_token";
@@ -69,6 +77,8 @@ class Config {
 
     std::uint32_t schema_ver;
     std::uint32_t cfg_rev;
+    int           stop_id;
+    DeviceStopList stops;
     char ssid[SSID_SIZE];
     char password[PASSWORD_SIZE];
     char device_token[DEVICE_TOKEN_SIZE];

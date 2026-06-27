@@ -23,10 +23,7 @@ static void screen_timer_cb(lv_timer_t *t) {
 
 void screen_manager_init(lv_obj_t *screen) {
 
-    // draw first screen
     ui_load_screen(screen);
-
-    // create auto-rotation timer
     lv_timer_create(screen_timer_cb, 100, screen);
 }
 
@@ -34,18 +31,16 @@ void ui_load_screen(lv_obj_t *screen) {
 
     screen_clock_destroy();
     screen_bus_destroy_timer();
+    screen_pairing_destroy_timer();
 
     lv_obj_clean(screen);
 
     switch (present_screen_type) {
         case SCREEN_BOOT:
             ui_load_screen_boot(screen);
-            //ui_load_arrows_btn(screen);
             break;
         case SCREEN_WIFI:
             ui_load_screen_wifi(screen);
-            //ui_load_arrows_btn(screen);
-
             break;
         case SCREEN_CLOCK:
             ui_load_screen_clock(screen);
@@ -60,6 +55,9 @@ void ui_load_screen(lv_obj_t *screen) {
             break;
         case SCREEN_TIMER:
             ui_load_screen_timer(screen);
+            break;
+        case SCREEN_PAIRING:
+            ui_load_screen_pairing(screen);
             break;
         case SCREEN_WEATHER:
             ui_load_screen_weather(screen);

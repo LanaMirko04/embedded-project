@@ -25,7 +25,7 @@ constexpr std::size_t RESULT_MESSAGE_SIZE = 128U;
 enum class Result {
     /*!
      * \defgroup      CommonResultCodes Common Result Codes
-     * @{
+     * \{
      */
     SUCCESS,                 /*!< Everything's OK */
     UNKNOWN_ERROR,           /*!< Unknown error */
@@ -36,12 +36,12 @@ enum class Result {
     NOT_FOUND,               /*!< When a resource is not found */
 
     /*!
-     * @}
+     * \}
      */
 
     /*!
      * \defgroup      FSMResultCodes FSM Result Codes
-     * @{
+     * \{
      */
 
     ACTION_ALREADY_REGISTERED, /*!< Action already registered */
@@ -49,18 +49,30 @@ enum class Result {
     INVALID_NEXT_STATE,        /*!< Invalid FSM next state */
 
     /*!
-     * @}
+     * \}
      */
 
     /*!
      * \defgroup      NetworkRelatedResultCodes Network related Result Codes
-     * @{
+     * \{
      */
 
     SYNC_FAILED,              /*!< Synchronization failed for some reason */
 
     /*!
-     * @}
+     * \}
+     */
+
+    /*!
+     * \defgroup      ApiRelatedReturnCodes API related Return Codes
+     * \{
+     */
+
+    API_STATUS_OK,  /*!< API status OK */
+    API_STATUS_DOWN /*!< API status down */
+
+    /*!
+     * \}
      */
 };
 
