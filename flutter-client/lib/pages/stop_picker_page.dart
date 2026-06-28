@@ -35,10 +35,14 @@ class _StopPickerPageState extends State<StopPickerPage> {
     final stops = await ApiService().fetchStops();
     if (!mounted) return;
     setState(() {
-      _all = stops;
-      _filtered = stops;
       _loading = false;
-      _error = stops.isEmpty ? 'No stops available' : null;
+      if (stops == null) {
+        _error = 'Failed to fetch stops';
+      } else {
+        _all = stops;
+        _filtered = stops;
+        _error = stops.isEmpty ? 'No stops available' : null;
+      }
     });
   }
 

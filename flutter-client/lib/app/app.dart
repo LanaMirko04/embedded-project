@@ -7,6 +7,7 @@ import '../services/auth_service.dart';
 import '../services/api_service.dart';
 import '../models/sdrumo.dart';
 import '../dialogs/login_dialog.dart';
+import '../utils/error_helpers.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -66,10 +67,11 @@ class _AuthGateState extends State<AuthGate> {
     super.initState();
     // Show login dialog if not authenticated
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!AuthService().isAuthenticated && mounted) {
+      if (AuthService().isKeyringLocked && mounted) {
+        _showKeyringLockedPrompt();
+      } else if (!AuthService().isAuthenticated && mounted) {
         _showLoginPrompt();
       } else if (AuthService().isAuthenticated && mounted) {
-        // Fetch user info and devices if authenticated
         _fetchUserInfo();
       }
     });
@@ -93,16 +95,41 @@ class _AuthGateState extends State<AuthGate> {
   }
 
   void _onAuthChanged() {
-    // If user logs out, show login dialog again
-    if (!AuthService().isAuthenticated && mounted) {
-      // Only show dialog if not already showing
-      if (!_isDialogShowing) {
-        _showLoginPrompt();
-      }
+    if (!mounted || _isDialogShowing) return;
+    if (AuthService().isKeyringLocked) {
+      _showKeyringLockedPrompt();
+    } else if (!AuthService().isAuthenticated) {
+      _showLoginPrompt();
     }
   }
 
   bool _isDialogShowing = false;
+
+  void _showKeyringLockedPrompt() {
+    _isDialogShowing = true;
+    showKeyringLockedDialog(
+      context,
+      onRetry: () {
+        _isDialogShowing = false;
+        AuthService().loadFromStorage().then((_) {
+          if (!mounted) return;
+          if (AuthService().isKeyringLocked) {
+            _showKeyringLockedPrompt();
+          } else if (AuthService().isAuthenticated) {
+            _fetchUserInfo();
+          } else {
+            _showLoginPrompt();
+          }
+        }).catchError((_) {
+          if (mounted) _showKeyringLockedPrompt();
+        });
+      },
+      onRelogin: () {
+        _isDialogShowing = false;
+        if (mounted) _showLoginPrompt();
+      },
+    );
+  }
 
   void _showLoginPrompt() {
     _isDialogShowing = true;

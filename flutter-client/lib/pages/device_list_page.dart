@@ -88,13 +88,13 @@ class _DeviceListPageState extends State<DeviceListPage> {
 
     if (token == null || token.isEmpty) return;
 
-    final success = await ApiService().pairDevice(token);
+    final error = await ApiService().pairDevice(token);
 
     if (!mounted) return;
 
-    if (success) {
-      // Refresh the device list
+    if (error == null) {
       final freshDevices = await ApiService().fetchSdrumos() ?? [];
+      if (!mounted) return;
       AuthService().setSdrumos(freshDevices);
       setState(() {
         _sdrumos = freshDevices;
@@ -104,7 +104,7 @@ class _DeviceListPageState extends State<DeviceListPage> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to pair device')),
+        SnackBar(content: Text(error)),
       );
     }
   }

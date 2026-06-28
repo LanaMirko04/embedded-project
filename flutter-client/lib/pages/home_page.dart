@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'device_list_page.dart';
 import '../dialogs/profile_dialog.dart';
+import '../dialogs/smartconfig_dialog.dart';
 import '../services/auth_service.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -33,6 +34,14 @@ class _MyHomePageState extends State<MyHomePage> {
         title: const Text('Devices'),
         actions: [
           IconButton(
+            tooltip: 'WiFi SmartConfig',
+            icon: const Icon(Icons.wifi_tethering),
+            onPressed: () => showDialog(
+              context: context,
+              builder: (_) => const SmartConfigDialog(),
+            ),
+          ),
+          IconButton(
             tooltip: 'Account',
             icon: const Icon(Icons.person_outline),
             onPressed: () async {
@@ -41,7 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 builder: (_) => const ProfileDialog(),
               );
             },
-          )
+          ),
         ],
       ),
       body: const DeviceListPage(),
