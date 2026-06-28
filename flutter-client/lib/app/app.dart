@@ -9,67 +9,6 @@ import '../models/sdrumo.dart';
 import '../dialogs/login_dialog.dart';
 import '../utils/error_helpers.dart';
 
-/// Shared visual language for the whole app: one corner radius, one card
-/// style, one input style, themed buttons. Keeps every page cohesive instead
-/// of each widget styling itself ad hoc.
-ThemeData _buildTheme(ColorScheme scheme) {
-  const radius = 12.0;
-  final shape = RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(radius),
-  );
-
-  return ThemeData(
-    useMaterial3: true,
-    colorScheme: scheme,
-    appBarTheme: AppBarTheme(
-      backgroundColor: scheme.surface,
-      foregroundColor: scheme.onSurface,
-      centerTitle: false,
-      scrolledUnderElevation: 2,
-    ),
-    cardTheme: CardThemeData(
-      elevation: 0,
-      color: scheme.surfaceContainerHighest,
-      margin: EdgeInsets.zero,
-      shape: shape,
-      clipBehavior: Clip.antiAlias,
-    ),
-    listTileTheme: const ListTileThemeData(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(radius)),
-      ),
-    ),
-    inputDecorationTheme: InputDecorationTheme(
-      filled: true,
-      fillColor: scheme.surfaceContainerHighest,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(radius),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(radius),
-        borderSide: BorderSide.none,
-      ),
-    ),
-    filledButtonTheme: FilledButtonThemeData(
-      style: FilledButton.styleFrom(
-        shape: shape,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-      ),
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(shape: shape),
-    ),
-    dialogTheme: DialogThemeData(shape: shape),
-    snackBarTheme: const SnackBarThemeData(
-      behavior: SnackBarBehavior.floating,
-    ),
-    chipTheme: ChipThemeData(
-      shape: StadiumBorder(side: BorderSide(color: scheme.outlineVariant)),
-    ),
-  );
-}
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -91,8 +30,14 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           title: 'sdrumoapp',
           themeMode: ThemeMode.system,
-          theme: _buildTheme(lightScheme),
-          darkTheme: _buildTheme(darkScheme),
+          theme: ThemeData(
+            useMaterial3: true,
+            colorScheme: lightScheme,
+          ),
+          darkTheme: ThemeData(
+            useMaterial3: true,
+            colorScheme: darkScheme,
+          ),
           home: const AuthGate(),
           onGenerateRoute: (settings) {
             if (settings.name == '/device') {

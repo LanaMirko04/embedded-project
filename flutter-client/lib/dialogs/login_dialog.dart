@@ -127,6 +127,7 @@ class _LoginDialogState extends State<LoginDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return AlertDialog(
       title: Text(_isRegisterMode ? 'Create Account' : 'Login'),
       content: SingleChildScrollView(
@@ -140,6 +141,7 @@ class _LoginDialogState extends State<LoginDialog> {
                 enabled: !_isLoading,
                 decoration: const InputDecoration(
                   labelText: 'Email',
+                  border: OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 12),
@@ -149,6 +151,7 @@ class _LoginDialogState extends State<LoginDialog> {
               enabled: !_isLoading,
               decoration: InputDecoration(
                 labelText: _isRegisterMode ? 'Username' : 'Username or Email',
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 12),
@@ -158,6 +161,7 @@ class _LoginDialogState extends State<LoginDialog> {
               enabled: !_isLoading,
               decoration: InputDecoration(
                 labelText: 'Password',
+                border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
                   tooltip: _obscurePassword ? 'Show password' : 'Hide password',
                   icon: Icon(
@@ -177,6 +181,7 @@ class _LoginDialogState extends State<LoginDialog> {
                 enabled: !_isLoading,
                 decoration: InputDecoration(
                   labelText: 'Confirm Password',
+                  border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
                     tooltip: _obscureConfirmPassword ? 'Show password' : 'Hide password',
                     icon: Icon(
@@ -215,8 +220,12 @@ class _LoginDialogState extends State<LoginDialog> {
                 height: 20,
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
-            : FilledButton(
+            : ElevatedButton(
                 onPressed: _isRegisterMode ? _submitRegister : _submitLogin,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.colorScheme.primaryContainer,
+                  foregroundColor: theme.colorScheme.onPrimaryContainer,
+                ),
                 child: Text(_isRegisterMode ? 'Register' : 'Login'),
               ),
       ],

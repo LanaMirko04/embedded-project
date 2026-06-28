@@ -115,22 +115,14 @@ class _DeviceListPageState extends State<DeviceListPage> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    final theme = Theme.of(context);
-
     if (_sdrumos.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.devices_other_outlined,
-              size: 48,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(height: 16),
-            Text('No devices yet', style: theme.textTheme.titleMedium),
+            const Text('No devices found'),
             const SizedBox(height: 24),
-            FilledButton.icon(
+            ElevatedButton.icon(
               onPressed: _showAddDeviceDialog,
               icon: const Icon(Icons.add),
               label: const Text('Add New Device'),
@@ -140,49 +132,70 @@ class _DeviceListPageState extends State<DeviceListPage> {
       );
     }
 
-    return ListView.separated(
+    return ListView.builder(
       itemCount: _sdrumos.length + 1,
       padding: const EdgeInsets.all(16),
-      separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         // Last item is the add button
         if (index == _sdrumos.length) {
-          return Card(
-            child: ListTile(
-              onTap: _showAddDeviceDialog,
-              leading: CircleAvatar(
-                backgroundColor: theme.colorScheme.primaryContainer,
-                foregroundColor: theme.colorScheme.onPrimaryContainer,
-                child: const Icon(Icons.add),
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: ElevatedButton.icon(
+              onPressed: _showAddDeviceDialog,
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
-              title: const Text('Add New Device'),
+              icon: const Icon(Icons.add),
+              label: const Text('Add New Device'),
             ),
           );
         }
 
         final device = _sdrumos[index];
-        return Card(
-          child: ListTile(
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            leading: CircleAvatar(
-              backgroundColor: theme.colorScheme.secondaryContainer,
-              foregroundColor: theme.colorScheme.onSecondaryContainer,
-              child: const Icon(Icons.alarm),
-            ),
-            title: Text(device.name, style: theme.textTheme.titleMedium),
-            subtitle: Text(
-              device.token ?? 'N/A',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: ElevatedButton(
+            onPressed: () {
+              // Navigate to device page
+              Navigator.pushNamed(
+                context,
+                '/device',
+                arguments: device,
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
             ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Navigator.pushNamed(context, '/device', arguments: device);
-            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          device.name,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          device.token ?? 'N/A',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.arrow_forward),
+                ],
+              ),
+            ),
           ),
         );
       },

@@ -74,7 +74,7 @@ class _ProfileDialogState extends State<ProfileDialog> {
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
           ),
         ),
         const SizedBox(height: 4),
@@ -152,7 +152,7 @@ class _ProfileDialogState extends State<ProfileDialog> {
                       onPressed: () => Navigator.of(context).pop(),
                       child: const Text('Close'),
                     ),
-                    FilledButton.tonalIcon(
+                    ElevatedButton(
                       onPressed: () async {
                         await AuthService().logout();
                         Navigator.of(context).pop();
@@ -160,8 +160,11 @@ class _ProfileDialogState extends State<ProfileDialog> {
                           const SnackBar(content: Text('Logged out')),
                         );
                       },
-                      icon: const Icon(Icons.logout, size: 18),
-                      label: const Text('Logout'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.primaryContainer,
+                        foregroundColor: theme.colorScheme.onPrimaryContainer,
+                      ),
+                      child: const Text('Logout'),
                     ),
                   ],
                 ),
@@ -178,7 +181,7 @@ class _ProfileDialogState extends State<ProfileDialog> {
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            theme.colorScheme.onSurfaceVariant,
+                            theme.colorScheme.onSurface.withOpacity(0.6),
                           ),
                         ),
                       )
@@ -211,7 +214,7 @@ class _ProfileDialogState extends State<ProfileDialog> {
         Icon(
           Icons.dns,
           size: 20,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          color: Colors.white,
         ),
         Positioned(
           bottom: 0,
