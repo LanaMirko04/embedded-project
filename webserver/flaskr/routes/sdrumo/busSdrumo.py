@@ -2,7 +2,8 @@ from flaskr.db import get_db
 import functools
 import requests
 from requests.auth import HTTPBasicAuth
-from datetime import datetime, timezone
+from datetime import datetime
+from zoneinfo import ZoneInfo
 import json
 from dotenv import load_dotenv
 import os
@@ -58,7 +59,7 @@ def get_trips(stopId):
         'stopId': stopId,
         'type': 'U',
         'limit': 10,
-        'refDateTime': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+        'refDateTime': datetime.now(ZoneInfo('Europe/Rome')).strftime('%Y-%m-%dT%H:%M:%S')
     }
 
     try:
