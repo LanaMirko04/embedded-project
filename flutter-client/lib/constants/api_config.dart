@@ -8,7 +8,7 @@ class ApiConfig {
   static const String refreshPath = '/user/auth/refresh';
 
   static const String getUsernamePath = '/user/info/getUsername';
-  static const String getSdrumpsPath = '/user/info/getSdrumos';
+  static const String getSdrumosPath = '/user/info/getSdrumos';
 
   static const String getStopsPath = '/user/bus/getStops';
   static const String getRoutesPath = '/user/bus/getRoutes';

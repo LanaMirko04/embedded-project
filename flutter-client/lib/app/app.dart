@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
           home: const AuthGate(),
           onGenerateRoute: (settings) {
             if (settings.name == '/device') {
-              final device = settings.arguments as Sdrump;
+              final device = settings.arguments as Sdrumo;
               return MaterialPageRoute(
                 builder: (_) => DevicePage(device: device),
               );

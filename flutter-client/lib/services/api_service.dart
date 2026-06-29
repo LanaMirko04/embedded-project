@@ -161,14 +161,14 @@ class ApiService {
     }
   }
 
-  Future<List<Sdrump>?> fetchSdrumos() async {
+  Future<List<Sdrumo>?> fetchSdrumos() async {
     try {
-      final response = await _dio.get(ApiConfig.getSdrumpsPath);
+      final response = await _dio.get(ApiConfig.getSdrumosPath);
       if (response.statusCode == 200 && response.data is Map) {
         // Handle wrapped response: { "sdrumos": [...] }
         List<dynamic> sdrumosList = response.data['sdrumos'] ?? [];
         final sdrumos = sdrumosList
-            .map((json) => Sdrump.fromJson(json as Map<String, dynamic>))
+            .map((json) => Sdrumo.fromJson(json as Map<String, dynamic>))
             .toList();
         AuthService().setSdrumos(sdrumos);
         return sdrumos;

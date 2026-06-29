@@ -1,16 +1,16 @@
-class Sdrump {
+class Sdrumo {
   final int id;
   final String name;
   final String? token;
 
-  Sdrump({
+  Sdrumo({
     required this.id,
     required this.name,
     this.token,
   });
 
-  factory Sdrump.fromJson(Map<String, dynamic> json) {
-    return Sdrump(
+  factory Sdrumo.fromJson(Map<String, dynamic> json) {
+    return Sdrumo(
       id: json['id'] as int,
       name: json['name'] as String,
       token: json['token'] as String?,

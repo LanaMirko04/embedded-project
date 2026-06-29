@@ -9,7 +9,7 @@ import 'stop_picker_page.dart';
 import 'route_picker_page.dart';
 
 class DevicePage extends StatefulWidget {
-  final Sdrump device;
+  final Sdrumo device;
 
   const DevicePage({super.key, required this.device});
 

@@ -11,7 +11,7 @@ class DeviceListPage extends StatefulWidget {
 }
 
 class _DeviceListPageState extends State<DeviceListPage> {
-  late List<Sdrump> _sdrumos;
+  late List<Sdrumo> _sdrumos;
   bool _isLoading = false;
 
   @override

@@ -25,7 +25,7 @@ class AuthService extends ChangeNotifier {
   String? _refreshToken;
   String? _userId;
   String? _username;
-  List<Sdrump> _sdrumos = [];
+  List<Sdrumo> _sdrumos = [];
   bool _isAdmin = false;
   bool _keyringLocked = false;
 
@@ -34,7 +34,7 @@ class AuthService extends ChangeNotifier {
   String? get refreshToken => _refreshToken;
   String? get currentUserId => _userId;
   String? get username => _username;
-  List<Sdrump> get sdrumos => _sdrumos;
+  List<Sdrumo> get sdrumos => _sdrumos;
   bool get isAdmin => _isAdmin;
   bool get isAuthenticated => _accessToken != null && _accessToken!.isNotEmpty;
   bool get isKeyringLocked => _keyringLocked;
@@ -141,7 +141,7 @@ class AuthService extends ChangeNotifier {
     if (changed) notifyListeners();
   }
 
-  void setSdrumos(List<Sdrump> sdrumos) {
+  void setSdrumos(List<Sdrumo> sdrumos) {
     _sdrumos = sdrumos;
     notifyListeners();
   }
