@@ -1,4 +1,4 @@
-const baseUrl = 'http://127.0.0.1:5000';
+const baseUrl = 'http://sdrumo.zagatti.me';
 
 class ApiConfig {
   static const String apiBaseUrl = '$baseUrl/api';

@@ -16,6 +16,9 @@ static DeviceStopList s_stops_cache    = {};
 static char           s_dropdown_buf[DEVICE_STOPS_MAX * 65];
 static char           selected_text[64];
 static lv_timer_t    *server_request_time = NULL;
+static lv_obj_t      *s_bus_container     = NULL;
+
+static void server_timer_cb(lv_timer_t *timer);
 
 
 static const char *bus_destination(const char *name, char *buf, size_t bufsz) {
@@ -65,8 +68,19 @@ static void bus_dropdown_event_cb(lv_event_t *e) {
         uint16_t sel = lv_dropdown_get_selected(dd);
         last_selected_bus = sel;
         lv_dropdown_get_selected_str(dd, selected_text, sizeof(selected_text));
-        if (sel < (uint16_t)s_stops_cache.count)
+        if (sel < (uint16_t)s_stops_cache.count) {
             api_task_notify_fetch_bus_stop(s_stops_cache.stops[sel].stop_id);
+            if (s_bus_container && lv_obj_is_valid(s_bus_container)) {
+                lv_obj_clean(s_bus_container);
+                lv_obj_t *lbl = lv_label_create(s_bus_container);
+                lv_label_set_text(lbl, "Fetching...");
+                lv_obj_align(lbl, LV_ALIGN_TOP_MID, 0, 40);
+                lv_obj_add_style(lbl, &style_subtitle, LV_STATE_DEFAULT);
+                if (server_request_time) lv_timer_reset(server_request_time);
+                lv_timer_t *t = lv_timer_create(server_timer_cb, 3000, s_bus_container);
+                lv_timer_set_repeat_count(t, 1);
+            }
+        }
     }
 }
 
@@ -188,7 +202,9 @@ static void create_bus_list(lv_obj_t *scr) {
     lv_obj_remove_flag(container, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_style_pad_all(container, 0, 0);
 
-    server_request_time = lv_timer_create(server_timer_cb, 60000, container);
+    s_bus_container = container;
+    if (!server_request_time)
+        server_request_time = lv_timer_create(server_timer_cb, 30000, container);
     server_timer_cb(server_request_time);
 }
 

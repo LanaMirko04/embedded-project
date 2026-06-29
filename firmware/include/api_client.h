@@ -32,7 +32,7 @@ class ApiClient {
 
   private:
     static constexpr const char *TAG = "API";
-    static constexpr const char *BASE_URL = "http://172.20.10.2:5000";
+    static constexpr const char *BASE_URL = "http://sdrumo.zagatti.me";
     static constexpr int TIMEOUT_MS = 5000;
     static constexpr int RESP_BUF_REGISTER = 128;
     static constexpr int RESP_BUF_TRIPS    = 2048;
