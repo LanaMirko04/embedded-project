@@ -247,10 +247,10 @@ A [Bruno](https://www.usebruno.com/) collection covering every endpoint is provi
 
 ## Presentation and Demo
 
-| Resource   | Link                                        |
-|------------|---------------------------------------------|
-| Slides     | [presentation.pdf](./docs/presentation.pdf) |
-| Demo video | *[add link]*                                |
+| Resource   | Link                                         |
+|------------|----------------------------------------------|
+| Slides     | [presentation.pdf](./docs/presentation.pdf)  |
+| Demo video | [YouTube link](https://youtu.be/Cjl7ZbLfhhg) |
 
 ## Team Members
 
