@@ -174,7 +174,6 @@
     - `clock`: analog hands, alarm/timer btns
     - `bus`: stop picker + trip list (≤5)
     - `weather`: today + 3-day forecast
-    - `alarm`, `timer`: scrollable pickers
     - `pairing`: token display + done btn
   ]
 ]
