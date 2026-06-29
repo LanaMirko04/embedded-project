@@ -67,6 +67,10 @@ cd flutter-client
 4. The board polls `/api/sdrumo/bus/getTrips/<token>` and
    `/api/sdrumo/weather/getWeather/<token>` to refresh its screens.
 
+## Exam evaluation
+
+See [`EVALUATION.md`](EVALUATION.md) for the exam/evaluation readme.
+
 ## License
 
 See [`LICENSE`](LICENSE).
