@@ -1,0 +1,7 @@
+info:
+  name: bus
+  type: folder
+  seq: 3
+
+request:
+  auth: inherit

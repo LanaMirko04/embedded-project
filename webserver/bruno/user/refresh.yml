@@ -1,0 +1,21 @@
+info:
+  name: refresh
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: 127.0.0.1:5000/api/user/auth/refresh
+  body:
+    type: json
+    data: |-
+      {
+        "refresh_token" : "PASTE_REFRESH_TOKEN_HERE"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

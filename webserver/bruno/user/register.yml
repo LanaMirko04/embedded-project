@@ -1,0 +1,23 @@
+info:
+  name: register
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: 127.0.0.1:5000/api/user/auth/register
+  body:
+    type: json
+    data: |-
+      {
+        "username" : "celli",
+        "email" : "celli@example.com",
+        "password" : "celli"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
