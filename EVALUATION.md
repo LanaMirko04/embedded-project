@@ -39,10 +39,10 @@ To flash the firmware you need a USB cable and the ESP-IDF toolchain (see below)
 
 ### Software Requirements
 
-| Component | Requirement |
-|-----------|-------------|
-| Firmware | ESP-IDF ≥ 5.2 |
-| Backend | Python 3.11+ |
+| Component     | Requirement                  |
+|---------------|------------------------------|
+| Firmware      | ESP-IDF ≥ 5.2                |
+| Backend       | Python 3.11+                 |
 | Companion app | Flutter SDK (stable channel) |
 
 - **ESP-IDF**: follow the [official installation guide](https://docs.espressif.com/projects/esp-idf/en/stable/esp32/get-started/index.html#installation). On Arch Linux: `yay -S esp-idf`.
@@ -207,11 +207,11 @@ After connecting to WiFi the device registers itself with the backend and displa
 
 Swipe or tap the on-screen arrows to move between screens:
 
-| Screen | Content |
-|--------|---------|
-| **Clock** | Current time (updates every second) |
-| **Bus** | Live arrivals for your configured stop; color-coded by line, with time-to-arrival and delay |
-| **Weather** | Current conditions + 3-day forecast |
+| Screen      | Content                                                                                     |
+|-------------|---------------------------------------------------------------------------------------------|
+| **Clock**   | Current time (updates every second)                                                         |
+| **Bus**     | Live arrivals for your configured stop; color-coded by line, with time-to-arrival and delay |
+| **Weather** | Current conditions + 3-day forecast                                                         |
 
 ### Changing the bus stop
 
@@ -231,31 +231,31 @@ idf.py erase-flash
 
 All routes are mounted under `/api/`. Device routes use a **token in the URL path**; user routes use **JWT**.
 
-| Method | Path | Auth | Consumer |
-|--------|------|------|----------|
-| GET | `/api/status/` | none | both |
-| POST | `/api/sdrumo/auth/register` | none | firmware |
-| GET | `/api/sdrumo/bus/getTrips/<token>` | none | firmware |
-| GET | `/api/sdrumo/weather/getWeather/<token>` | none | firmware |
-| GET | `/api/sdrumo/config/getConfig/<token>` | none | firmware |
-| POST | `/api/user/auth/login` | none | app |
-| POST | `/api/user/auth/register` | none | app |
-| GET | `/api/config/get/<token>` | JWT | app |
-| POST | `/api/config/pair` | JWT | app |
+| Method | Path                                     | Auth | Consumer |
+|--------|------------------------------------------|------|----------|
+| GET    | `/api/status/`                           | none | both     |
+| POST   | `/api/sdrumo/auth/register`              | none | firmware |
+| GET    | `/api/sdrumo/bus/getTrips/<token>`       | none | firmware |
+| GET    | `/api/sdrumo/weather/getWeather/<token>` | none | firmware |
+| GET    | `/api/sdrumo/config/getConfig/<token>`   | none | firmware |
+| POST   | `/api/user/auth/login`                   | none | app      |
+| POST   | `/api/user/auth/register`                | none | app      |
+| GET    | `/api/config/get/<token>`                | JWT  | app      |
+| POST   | `/api/config/pair`                       | JWT  | app      |
 
 A [Bruno](https://www.usebruno.com/) collection covering every endpoint is provided under `webserver/bruno/`.
 
 ## Presentation and Demo
 
-| Resource | Link |
-|----------|------|
-| Slides | [presentation.pdf](./docs/presentation.pdf) |
-| Demo video | *[add link]* |
+| Resource   | Link                                        |
+|------------|---------------------------------------------|
+| Slides     | [presentation.pdf](./docs/presentation.pdf) |
+| Demo video | *[add link]*                                |
 
 ## Team Members
 
-| Name | GitHub | Commits |
-|------|--------|---------|
-| Mirko Lana | [@LanaMirko04](https://github.com/LanaMirko04) | 63 |
-| Giulia Cristofolini | [@giulzzz04](https://github.com/giulzzz04) | 31 |
-| Mattia Zagatti | [@MatPrayer](https://github.com/MatPrayer) | 25 |
+| Name                | GitHub                                         |
+|---------------------|------------------------------------------------|
+| Mirko Lana          | [@LanaMirko04](https://github.com/LanaMirko04) |
+| Giulia Cristofolini | [@giulzzz04](https://github.com/giulzzz04)     |
+| Mattia Zagatti      | [@MatPrayer](https://github.com/MatPrayer)     |
